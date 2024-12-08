@@ -1,4 +1,4 @@
-# Install script for directory: /Users/Elijah/Desktop/Brown/CS1230/the-cutie-creators/glm
+# Install script for directory: /Users/Tiffany/Desktop/csci1230/the-cutie-creators/glm
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

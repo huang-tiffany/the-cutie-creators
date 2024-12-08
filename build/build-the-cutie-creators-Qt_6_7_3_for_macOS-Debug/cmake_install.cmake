@@ -1,4 +1,4 @@
-# Install script for directory: /Users/Elijah/Desktop/Brown/CS1230/the-cutie-creators
+# Install script for directory: /Users/Tiffany/Desktop/csci1230/the-cutie-creators
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/Users/Elijah/Desktop/Brown/CS1230/the-cutie-creators/build/build-the-cutie-creators-Qt_6_7_3_for_macOS-Debug/glm/cmake_install.cmake")
+  include("/Users/Tiffany/Desktop/csci1230/the-cutie-creators/build/build-the-cutie-creators-Qt_6_7_3_for_macOS-Debug/glm/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/Elijah/Desktop/Brown/CS1230/the-cutie-creators/build/build-the-cutie-creators-Qt_6_7_3_for_macOS-Debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/build/build-the-cutie-creators-Qt_6_7_3_for_macOS-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

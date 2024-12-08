@@ -66,13 +66,15 @@ void Realtime::initializeGL() {
     m_timer = startTimer(1000/60);
     m_elapsedTimer.start();
 
+    srand(time(0));
+
     // Initialize GL extension wrangler
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
     if (err != GLEW_OK) fprintf(stderr, "Error while initializing GLEW: %s\n", glewGetErrorString(err));
     fprintf(stdout, "Successfully initialized GLEW %s\n", glewGetString(GLEW_VERSION));
 
-    glEnable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
@@ -135,6 +137,8 @@ void Realtime::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (RenderShapeData shape : m_data.shapes) {
+        glBindVertexArray(m_vao_cube);
+
         switch (shape.primitive.type) {
         case PrimitiveType::PRIMITIVE_SPHERE:
             glBindVertexArray(m_vao_sphere);
@@ -152,9 +156,14 @@ void Realtime::paintGL() {
             break;
         }
 
-        glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
-        glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
-        glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
+        // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
+        // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
+        // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
+
+
+        glm::vec4 cAmbient(1, 1, 1, 1);
+        glm::vec4 cDiffuse(1, 1, 1, 1);
+        glm::vec4 cSpecular(1, 1, 1, 1);
 
         glUseProgram(m_shader);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
@@ -176,7 +185,8 @@ void Realtime::paintGL() {
         glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
         glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
         glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
-        glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
+        // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
+        glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
         glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
 
         switch (shape.primitive.type) {
@@ -195,6 +205,8 @@ void Realtime::paintGL() {
         case PrimitiveType::PRIMITIVE_MESH:
             break;
         }
+
+        // glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
         glBindVertexArray(0);
     }
@@ -265,6 +277,25 @@ void Realtime::setUpScene() {
         std::cerr << "Error loading scene" << std::endl;
     }
 
+    m_data.shapes.clear();
+    for (int i = 0; i < 10; i++) { // todo: dynamic param update for num buildings/density
+        ScenePrimitive primitive;
+        primitive.type = PrimitiveType::PRIMITIVE_CUBE;
+        float r1 = (arc4random_uniform(9) + 1.f) / 5.f;
+        float r2 = (arc4random_uniform(9) + 1.f) / 5.f;
+        float r3 = (arc4random_uniform(9) + 1.f) / 5.f;
+        std::cout << r1 << std::endl;
+        std::cout << r2 << std::endl;
+        std::cout << r3 << std::endl;
+        glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(r1, r2 / 4.f, r3));
+        ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(r3 / 2.f, r2 / 2.f, r1 / 2.f));
+
+        RenderShapeData shape;
+        shape.ctm = ctm;
+        shape.primitive = primitive;
+        m_data.shapes.push_back(shape);
+    }
+
     RealtimeScene scene{ size().width(), size().height(), m_data };
     camera = scene.getCamera();
 
@@ -319,6 +350,19 @@ void Realtime::settingsChanged() {
         cube->clearData();
         cone->clearData();
         cylinder->clearData();
+
+        // m_data.shapes.clear();
+        // for (int i = 0; i < 5; i++) { // todo: dynamic param update for num buildings/density
+        //     ScenePrimitive primitive;
+        //     primitive.type = PrimitiveType::PRIMITIVE_CUBE;
+        //     glm::mat4 ctm = glm::mat4(); // the cumulative transformation matrix
+        //     ctm *= glm::translate(glm::mat4(1.0f), glm::vec3(5,  5, rand() % 5));
+
+        //     RenderShapeData shape;
+        //     shape.ctm = ctm;
+        //     shape.primitive = primitive;
+        //     m_data.shapes.push_back(shape);
+        // }
 
         sphere->updateParams(settings.shapeParameter1, settings.shapeParameter2);
         setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
