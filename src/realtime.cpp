@@ -110,8 +110,8 @@ void Realtime::initializeGL() {
         int keep_console_open;
         std::cin >> keep_console_open;
     }
-    m_text = new Text(m_free_type, size().width(), size().height(), "hello world"); // Declare a new text object, passing in your chosen alphabet.
-    m_text->create_text_message("hello world", 50, 50, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
+    m_text = new Text(m_free_type, size().width(), size().height(), " qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/"); // Declare a new text object, passing in your chosen alphabet.
+    m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -238,8 +238,7 @@ void Realtime::paintGL() {
         unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
         glUniform3fv(font_colour_loc, 1, &RGB[0]);
 
-        m_text->draw_messages();
-        m_text->draw_alphabets();
+        m_text->draw_messages(m_text->messages.size() - 1);
 
         // glBindVertexArray(0);
     // }
@@ -388,6 +387,8 @@ void Realtime::settingsChanged() {
                            0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
                            0.f, 0.f, 1.f / settings.farPlane, 0.f,
                            0.f, 0.f, 0.f, 1.f);
+
+        m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
     }
     update(); // asks for a PaintGL() call to occur
 }

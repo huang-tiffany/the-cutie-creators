@@ -182,6 +182,8 @@ void MainWindow::initialize() {
     vLayout->addWidget(nearLayout);
     vLayout->addWidget(far_label);
     vLayout->addWidget(farLayout);
+    vLayout->addWidget(text_label);
+    vLayout->addWidget(textLayout);
     vLayout->addWidget(filters_label);
     vLayout->addWidget(filter1);
     vLayout->addWidget(filter2);
@@ -201,6 +203,8 @@ void MainWindow::initialize() {
     // Set default values for near and far planes
     onValChangeNearBox(0.1f);
     onValChangeFarBox(10.f);
+
+    onValChangeTextBox("Hello World");
 }
 
 void MainWindow::finish() {
@@ -217,6 +221,7 @@ void MainWindow::connectUIElements() {
     connectParam2();
     connectNear();
     connectFar();
+    connectText();
     connectExtraCredit();
 }
 
@@ -258,6 +263,10 @@ void MainWindow::connectFar() {
     connect(farSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeFarSlider);
     connect(farBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeFarBox);
+}
+
+void MainWindow::connectText() {
+    connect(textBox, &QLineEdit::textChanged, this, &MainWindow::onValChangeTextBox);
 }
 
 void MainWindow::connectExtraCredit() {
@@ -364,8 +373,8 @@ void MainWindow::onValChangeFarBox(double newValue) {
 
 void MainWindow::onValChangeTextBox(QString newValue) {
     textBox->setText(newValue);
-    // settings.farPlane = farBox->value();
-    // realtime->settingsChanged();
+    settings.text = textBox->text().toStdString();
+    realtime->settingsChanged();
 }
 
 // Extra Credit:

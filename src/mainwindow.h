@@ -29,6 +29,7 @@ private:
     void connectUploadFile();
     void connectSaveImage();
     void connectExtraCredit();
+    void connectText();
 
     Realtime *realtime;
     AspectRatioWidget *aspectRatioWidget;
