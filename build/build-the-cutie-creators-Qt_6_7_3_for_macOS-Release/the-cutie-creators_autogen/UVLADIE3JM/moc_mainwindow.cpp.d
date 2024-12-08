@@ -360,6 +360,7 @@
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qtversionchecks.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qtypeinfo.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qtypes.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qurl.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qutf8stringview.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qvariant.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtCore.framework/Versions/A/Headers/qvarlengtharray.h \
@@ -381,6 +382,7 @@
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qopengl.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qpaintdevice.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qpalette.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qpen.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qpixelformat.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qpixmap.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qpolygon.h \
@@ -388,6 +390,10 @@
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qrgb.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qrgba64.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qsurfaceformat.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtextcursor.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtextdocument.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtextformat.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtextoption.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtgui-config.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtguiexports.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtGui.framework/Versions/A/Headers/qtguiglobal.h \
@@ -401,6 +407,7 @@
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QBoxLayout \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QCheckBox \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QDoubleSpinBox \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QLineEdit \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QMainWindow \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QPushButton \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/QSlider \
@@ -411,9 +418,11 @@
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qabstractspinbox.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qboxlayout.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qcheckbox.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qframe.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qgridlayout.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qlayout.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qlayoutitem.h \
+  /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qlineedit.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qmainwindow.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qpushbutton.h \
   /Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qsizepolicy.h \

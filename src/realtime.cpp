@@ -110,10 +110,8 @@ void Realtime::initializeGL() {
         int keep_console_open;
         std::cin >> keep_console_open;
     }
-    m_text = new Text(m_free_type, size().width(), size().height(), "aasdf"); // Declare a new text object, passing in your chosen alphabet.
-    m_text->create_text_message("a", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false); // True indicates that the message will be modified.
-
-    m_text->create_text_message("aff", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
+    m_text = new Text(m_free_type, size().width(), size().height(), "hello world"); // Declare a new text object, passing in your chosen alphabet.
+    m_text->create_text_message("hello world", 50, 50, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -303,8 +301,6 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
     // // Clean-up bindings
     // glBindVertexArray(0);
     // glBindBuffer(GL_ARRAY_BUFFER,0);
-
-
 }
 
 void Realtime::setUpScene() {
@@ -485,17 +481,17 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
         int deltaY = posY - m_prev_mouse_pos.y;
         m_prev_mouse_pos = glm::vec2(posX, posY);
 
-        float xChange = deltaX * 0.05f;
-        float yChange = deltaY * 0.05f;
+        float xChange = deltaX * -0.01f;
+        float yChange = deltaY * -0.01f;
 
         // glm::vec3 look = glm::vec3(m_data.cameraData.look);
-        m_model = rotate(m_model, xChange, glm::vec3(1.0f, 0.0f, 0.0f));
+        m_model = rotate(m_model, xChange, glm::vec3(0.0f, 1.0f, 0.0f));
 
         // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
         glm::vec3 up = glm::vec3(0, 1, 0);
         // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
 
-        m_model = rotate(m_model, yChange, up);
+        m_model = rotate(m_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
         // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
         // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
 

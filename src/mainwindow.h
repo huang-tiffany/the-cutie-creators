@@ -6,6 +6,7 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QLineEdit>
 #include "realtime.h"
 #include "utils/aspectratiowidget/aspectratiowidget.hpp"
 
@@ -43,6 +44,7 @@ private:
     QSlider *farSlider;
     QDoubleSpinBox *nearBox;
     QDoubleSpinBox *farBox;
+    QLineEdit *textBox;
 
     // Extra Credit:
     QCheckBox *ec1;
@@ -61,6 +63,7 @@ private slots:
     void onValChangeFarSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
+    void onValChangeTextBox(QString newValue);
 
     // Extra Credit:
     void onExtraCredit1();

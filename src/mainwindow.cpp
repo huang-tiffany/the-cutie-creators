@@ -44,7 +44,8 @@ void MainWindow::initialize() {
     near_label->setText("Near Plane:");
     QLabel *far_label = new QLabel(); // Far plane label
     far_label->setText("Far Plane:");
-
+    QLabel *text_label = new QLabel(); // Text label
+    text_label->setText("Text:");
 
 
     // Create checkbox for per-pixel filter
@@ -109,6 +110,8 @@ void MainWindow::initialize() {
     QHBoxLayout *lnear = new QHBoxLayout();
     QGroupBox *farLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lfar = new QHBoxLayout();
+    QGroupBox *textLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *ltext = new QHBoxLayout();
 
     // Create slider controls to control near/far planes
     nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
@@ -135,6 +138,9 @@ void MainWindow::initialize() {
     farBox->setSingleStep(0.1f);
     farBox->setValue(100.f);
 
+    textBox = new QLineEdit();
+    textBox->setText("Hello World");
+
     // Adds the slider and number box to the parameter layouts
     lnear->addWidget(nearSlider);
     lnear->addWidget(nearBox);
@@ -143,6 +149,9 @@ void MainWindow::initialize() {
     lfar->addWidget(farSlider);
     lfar->addWidget(farBox);
     farLayout->setLayout(lfar);
+
+    ltext->addWidget(textBox);
+    textLayout->setLayout(ltext);
 
     // Extra Credit:
     ec1 = new QCheckBox();
@@ -351,6 +360,12 @@ void MainWindow::onValChangeFarBox(double newValue) {
     //farBox->setValue(newValue);
     settings.farPlane = farBox->value();
     realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeTextBox(QString newValue) {
+    textBox->setText(newValue);
+    // settings.farPlane = farBox->value();
+    // realtime->settingsChanged();
 }
 
 // Extra Credit:
