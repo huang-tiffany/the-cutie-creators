@@ -45,7 +45,8 @@ void MainWindow::initialize() {
     QLabel *far_label = new QLabel(); // Far plane label
     far_label->setText("Far Plane:");
     QLabel *text_label = new QLabel(); // Text label
-    text_label->setText("Text:");
+    text_label->setText("Text");
+    text_label->setFont(font);
 
 
     // Create checkbox for per-pixel filter
@@ -106,49 +107,49 @@ void MainWindow::initialize() {
     p2Layout->setLayout(l2);
 
     // Creates the boxes containing the camera sliders and number boxes
-    QGroupBox *nearLayout = new QGroupBox(); // horizonal near slider alignment
-    QHBoxLayout *lnear = new QHBoxLayout();
-    QGroupBox *farLayout = new QGroupBox(); // horizonal far slider alignment
-    QHBoxLayout *lfar = new QHBoxLayout();
+    // QGroupBox *nearLayout = new QGroupBox(); // horizonal near slider alignment
+    // QHBoxLayout *lnear = new QHBoxLayout();
+    // QGroupBox *farLayout = new QGroupBox(); // horizonal far slider alignment
+    // QHBoxLayout *lfar = new QHBoxLayout();
     QGroupBox *textLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *ltext = new QHBoxLayout();
 
     // Create slider controls to control near/far planes
-    nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
-    nearSlider->setTickInterval(1);
-    nearSlider->setMinimum(1);
-    nearSlider->setMaximum(1000);
-    nearSlider->setValue(10);
+    // nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    // nearSlider->setTickInterval(1);
+    // nearSlider->setMinimum(1);
+    // nearSlider->setMaximum(1000);
+    // nearSlider->setValue(10);
 
-    nearBox = new QDoubleSpinBox();
-    nearBox->setMinimum(0.01f);
-    nearBox->setMaximum(10.f);
-    nearBox->setSingleStep(0.1f);
-    nearBox->setValue(0.1f);
+    // nearBox = new QDoubleSpinBox();
+    // nearBox->setMinimum(0.01f);
+    // nearBox->setMaximum(10.f);
+    // nearBox->setSingleStep(0.1f);
+    // nearBox->setValue(0.1f);
 
-    farSlider = new QSlider(Qt::Orientation::Horizontal); // Far plane slider
-    farSlider->setTickInterval(1);
-    farSlider->setMinimum(1000);
-    farSlider->setMaximum(10000);
-    farSlider->setValue(10000);
+    // farSlider = new QSlider(Qt::Orientation::Horizontal); // Far plane slider
+    // farSlider->setTickInterval(1);
+    // farSlider->setMinimum(1000);
+    // farSlider->setMaximum(10000);
+    // farSlider->setValue(10000);
 
-    farBox = new QDoubleSpinBox();
-    farBox->setMinimum(10.f);
-    farBox->setMaximum(100.f);
-    farBox->setSingleStep(0.1f);
-    farBox->setValue(100.f);
+    // farBox = new QDoubleSpinBox();
+    // farBox->setMinimum(10.f);
+    // farBox->setMaximum(100.f);
+    // farBox->setSingleStep(0.1f);
+    // farBox->setValue(100.f);
 
     textBox = new QLineEdit();
     textBox->setText("Hello World");
 
     // Adds the slider and number box to the parameter layouts
-    lnear->addWidget(nearSlider);
-    lnear->addWidget(nearBox);
-    nearLayout->setLayout(lnear);
+    // lnear->addWidget(nearSlider);
+    // lnear->addWidget(nearBox);
+    // nearLayout->setLayout(lnear);
 
-    lfar->addWidget(farSlider);
-    lfar->addWidget(farBox);
-    farLayout->setLayout(lfar);
+    // lfar->addWidget(farSlider);
+    // lfar->addWidget(farBox);
+    // farLayout->setLayout(lfar);
 
     ltext->addWidget(textBox);
     textLayout->setLayout(ltext);
@@ -172,27 +173,27 @@ void MainWindow::initialize() {
 
     vLayout->addWidget(uploadFile);
     vLayout->addWidget(saveImage);
-    vLayout->addWidget(tesselation_label);
-    vLayout->addWidget(param1_label);
-    vLayout->addWidget(p1Layout);
-    vLayout->addWidget(param2_label);
-    vLayout->addWidget(p2Layout);
-    vLayout->addWidget(camera_label);
-    vLayout->addWidget(near_label);
-    vLayout->addWidget(nearLayout);
-    vLayout->addWidget(far_label);
-    vLayout->addWidget(farLayout);
+    // vLayout->addWidget(tesselation_label);
+    // vLayout->addWidget(param1_label);
+    // vLayout->addWidget(p1Layout);
+    // vLayout->addWidget(param2_label);
+    // vLayout->addWidget(p2Layout);
+    // vLayout->addWidget(camera_label);
+    // vLayout->addWidget(near_label);
+    // vLayout->addWidget(nearLayout);
+    // vLayout->addWidget(far_label);
+    // vLayout->addWidget(farLayout);
     vLayout->addWidget(text_label);
     vLayout->addWidget(textLayout);
     vLayout->addWidget(filters_label);
     vLayout->addWidget(filter1);
     vLayout->addWidget(filter2);
     // Extra Credit:
-    vLayout->addWidget(ec_label);
-    vLayout->addWidget(ec1);
-    vLayout->addWidget(ec2);
-    vLayout->addWidget(ec3);
-    vLayout->addWidget(ec4);
+    // vLayout->addWidget(ec_label);
+    // vLayout->addWidget(ec1);
+    // vLayout->addWidget(ec2);
+    // vLayout->addWidget(ec3);
+    // vLayout->addWidget(ec4);
 
     connectUIElements();
 
@@ -201,8 +202,8 @@ void MainWindow::initialize() {
     onValChangeP2(5);
 
     // Set default values for near and far planes
-    onValChangeNearBox(0.1f);
-    onValChangeFarBox(10.f);
+    // onValChangeNearBox(0.1f);
+    // onValChangeFarBox(100.f);
 
     onValChangeTextBox("Hello World");
 }
@@ -219,10 +220,10 @@ void MainWindow::connectUIElements() {
     connectSaveImage();
     connectParam1();
     connectParam2();
-    connectNear();
-    connectFar();
+    // connectNear();
+    // connectFar();
     connectText();
-    connectExtraCredit();
+    // connectExtraCredit();
 }
 
 void MainWindow::connectPerPixelFilter() {
