@@ -85,9 +85,6 @@ private:
     Cone* cone = new Cone();
     Cylinder* cylinder = new Cylinder();
 
-    // FT_Library* m_free_type;
-    // Text* m_text;
-
     glm::mat4 m_model = glm::mat4(1);
     glm::mat4 m_view  = glm::mat4(1);
     glm::mat4 m_proj  = glm::mat4(1);

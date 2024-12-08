@@ -188,8 +188,8 @@ void Realtime::paintGL() {
 
         glUseProgram(m_shader);
     //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
-    //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "projection"), 1, GL_FALSE, &m_proj[0][0]);
     //     glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
     //     glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
     //     glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);

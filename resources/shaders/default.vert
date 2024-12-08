@@ -33,7 +33,7 @@ void main(void)
 
         // Enable this line for 2D window-positioned text
         // -------------------------------------------------------------
-        gl_Position = vec4(vertex.xy, 0.0, 1.0);
+        gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
 
         // Enable these two lines instead for 3D animated text
         // --------------------------------------------------------------------
