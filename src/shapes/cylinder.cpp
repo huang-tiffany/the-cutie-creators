@@ -1,4 +1,4 @@
-#include "Cylinder.h"
+#include "cylinder.h"
 
 void Cylinder::updateParams(int param1, int param2) {
     m_vertexData = std::vector<float>();

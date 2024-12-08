@@ -6,6 +6,7 @@
 #endif
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glut/glut.h>
 
 #include <unordered_map>
 #include <QElapsedTimer>
@@ -18,6 +19,9 @@
 #include "shapes/cube.h"
 #include "shapes/cone.h"
 #include "shapes/cylinder.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include "text_fonts_glyphs.h"
 
 class Realtime : public QOpenGLWidget
 {
@@ -80,6 +84,9 @@ private:
     Cube* cube = new Cube();
     Cone* cone = new Cone();
     Cylinder* cylinder = new Cylinder();
+
+    // FT_Library* m_free_type;
+    // Text* m_text;
 
     glm::mat4 m_model = glm::mat4(1);
     glm::mat4 m_view  = glm::mat4(1);

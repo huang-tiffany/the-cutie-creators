@@ -12,6 +12,9 @@
 
 // ================== Project 5: Lights, Camera
 
+FT_Library m_free_type;
+Text* m_text;
+
 Realtime::Realtime(QWidget *parent)
     : QOpenGLWidget(parent),
       camera(Camera{ m_data.cameraData })
@@ -52,6 +55,12 @@ void Realtime::finish() {
     glDeleteTextures(1, &m_fbo_texture);
     glDeleteRenderbuffers(1, &m_fbo_renderbuffer);
     glDeleteFramebuffers(1, &m_fbo);
+
+    FT_Done_Face(m_text->face);
+    FT_Done_FreeType(m_free_type);
+    glDeleteProgram(m_shader);
+
+    exit(EXIT_SUCCESS); // Function call: exit() is a C/C++ function that performs various tasks to help clean up resources.
 }
 
 void Realtime::initializeGL() {
@@ -126,6 +135,7 @@ void Realtime::initializeGL() {
 
     initFinish = true;
 
+
 }
 
 void Realtime::paintGL() {
@@ -134,70 +144,89 @@ void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (RenderShapeData shape : m_data.shapes) {
-        switch (shape.primitive.type) {
-        case PrimitiveType::PRIMITIVE_SPHERE:
-            glBindVertexArray(m_vao_sphere);
-            break;
-        case PrimitiveType::PRIMITIVE_CUBE:
-            glBindVertexArray(m_vao_cube);
-            break;
-        case PrimitiveType::PRIMITIVE_CONE:
-            glBindVertexArray(m_vao_cone);
-            break;
-        case PrimitiveType::PRIMITIVE_CYLINDER:
-            glBindVertexArray(m_vao_cylinder);
-            break;
-        case PrimitiveType::PRIMITIVE_MESH:
-            break;
-        }
+    // for (RenderShapeData shape : m_data.shapes) {
+    //     switch (shape.primitive.type) {
+    //     case PrimitiveType::PRIMITIVE_SPHERE:
+    //         glBindVertexArray(m_vao_sphere);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_CUBE:
+    //         glBindVertexArray(m_vao_cube);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_CONE:
+    //         glBindVertexArray(m_vao_cone);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_CYLINDER:
+    //         glBindVertexArray(m_vao_cylinder);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_MESH:
+    //         break;
+    //     }
 
-        glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
-        glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
-        glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
+    //     glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
+    //     glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
+    //     glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
 
-        glUseProgram(m_shader);
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
-        glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
-        glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
-        glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);
-        glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 8, &m_lightPos[0][0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 8, &m_lightDir[0][0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 8, &m_lightColors[0][0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "cAmbient"), 1, &cAmbient[0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "cDiffuse"), 1, &cDiffuse[0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "cSpecular"), 1, &cSpecular[0]);
-        glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 8, &m_lightType[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "a"), 8, &m_a[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "b"), 8, &m_b[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "c"), 8, &m_c[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
-        glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
-        glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
-        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+    //     glUseProgram(m_shader);
+    //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
+    //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
+    //     glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
+    //     glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
+    //     glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 8, &m_lightPos[0][0]);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 8, &m_lightDir[0][0]);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 8, &m_lightColors[0][0]);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "cAmbient"), 1, &cAmbient[0]);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "cDiffuse"), 1, &cDiffuse[0]);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "cSpecular"), 1, &cSpecular[0]);
+    //     glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 8, &m_lightType[0]);
+    //     glUniform1fv(glGetUniformLocation(m_shader, "a"), 8, &m_a[0]);
+    //     glUniform1fv(glGetUniformLocation(m_shader, "b"), 8, &m_b[0]);
+    //     glUniform1fv(glGetUniformLocation(m_shader, "c"), 8, &m_c[0]);
+    //     glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
+    //     glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
+    //     glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
+    //     glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
+    //     glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
 
-        switch (shape.primitive.type) {
-        case PrimitiveType::PRIMITIVE_SPHERE:
-            glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_CUBE:
-            glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_CONE:
-            glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_CYLINDER:
-            glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_MESH:
-            break;
-        }
+    //     switch (shape.primitive.type) {
+    //     case PrimitiveType::PRIMITIVE_SPHERE:
+    //         glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_CUBE:
+    //         glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_CONE:
+    //         glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_CYLINDER:
+    //         glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
+    //         break;
+    //     case PrimitiveType::PRIMITIVE_MESH:
+    //         break;
+    //     }
 
+        ///
+        ///
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+
+        // glm::vec3 RGB(10.0f, 120.0f, 105.0f);
+        float RGB[3];
+        RGB[0] = 10.f;
+        RGB[1] = 120.f;
+        RGB[2] = 105.f;
+        unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
+        glUniform3fv(font_colour_loc, 1, &RGB[0]);
+
+
+        int num_replace = 3;
+        size_t vec_size = m_text->messages[0].characters_quads.size();
+        float start_pos = m_text->messages[0].start_x_current[vec_size - num_replace];
+
+        m_text->draw_messages(0);
+        m_text->draw_alphabets();
         glBindVertexArray(0);
-    }
+    // }
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_screen_width, m_screen_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -238,24 +267,35 @@ void Realtime::resizeGL(int w, int h) {
 
 void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<float> shapeData) {
     // Generate and bind VBO
-    glGenBuffers(1, &shape_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, shape_vbo);
+    // glGenBuffers(1, &shape_vbo);
+    // glBindBuffer(GL_ARRAY_BUFFER, shape_vbo);
 
-    // Send data to VBO
-    glBufferData(GL_ARRAY_BUFFER, shapeData.size() * sizeof(GLfloat), shapeData.data(), GL_STATIC_DRAW);
-    // Generate, and bind vao
-    glGenVertexArrays(1, &shape_vao);
-    glBindVertexArray(shape_vao);
+    // // Send data to VBO
+    // glBufferData(GL_ARRAY_BUFFER, shapeData.size() * sizeof(GLfloat), shapeData.data(), GL_STATIC_DRAW);
+    // // Generate, and bind vao
+    // glGenVertexArrays(1, &shape_vao);
+    // glBindVertexArray(shape_vao);
 
-    // Enable and define attribute 0 to store vertex positions
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat)));
+    // // Enable and define attribute 0 to store vertex positions
+    // glEnableVertexAttribArray(0);
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(0));
+    // glEnableVertexAttribArray(1);
+    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat)));
 
-    // Clean-up bindings
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER,0);
+    // // Clean-up bindings
+    // glBindVertexArray(0);
+    // glBindBuffer(GL_ARRAY_BUFFER,0);
+
+    FT_Error error_code = FT_Init_FreeType(&m_free_type);
+    if (error_code)
+    {
+        std::cout << "\n   Error code: " << error_code << " --- " << "An error occurred during initialising the FT_Library";
+        int keep_console_open;
+        std::cin >> keep_console_open;
+    }
+    m_text = new Text(m_free_type, 300, 300, "01234567890Get Rady.Timr:owns&ClBgfb"); // Declare a new text object, passing in your chosen alphabet.
+    m_text->create_text_message("Get Ready... Timer: 000", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, true); // True indicates that the message will be modified.
+
 }
 
 void Realtime::setUpScene() {

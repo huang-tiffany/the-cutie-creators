@@ -1,0 +1,27 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"freetype/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"id" : "freetype_autogen_timestamp_deps::@96957e95d729942f8bb0",
+	"isGeneratorProvided" : true,
+	"name" : "freetype_autogen_timestamp_deps",
+	"paths" : 
+	{
+		"build" : "freetype",
+		"source" : "freetype"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}
