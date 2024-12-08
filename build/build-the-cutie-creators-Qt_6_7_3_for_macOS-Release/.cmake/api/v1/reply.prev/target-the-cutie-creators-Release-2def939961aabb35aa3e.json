@@ -61,7 +61,7 @@
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 71,
+				"line" : 72,
 				"parent" : 0
 			},
 			{
@@ -366,19 +366,19 @@
 			{
 				"command" : 7,
 				"file" : 0,
-				"line" : 67,
+				"line" : 68,
 				"parent" : 0
 			},
 			{
 				"command" : 7,
 				"file" : 0,
-				"line" : 68,
+				"line" : 69,
 				"parent" : 0
 			},
 			{
 				"command" : 11,
 				"file" : 0,
-				"line" : 82,
+				"line" : 83,
 				"parent" : 0
 			},
 			{
@@ -588,7 +588,7 @@
 				10,
 				11,
 				12,
-				28
+				29
 			]
 		}
 	],
@@ -769,7 +769,7 @@
 				10,
 				11,
 				12,
-				28
+				29
 			]
 		},
 		{
@@ -790,22 +790,23 @@
 				24,
 				25,
 				26,
-				27
+				27,
+				28
 			]
 		},
 		{
 			"name" : "",
 			"sourceIndexes" : 
 			[
-				29
+				30
 			]
 		},
 		{
 			"name" : "CMake Rules",
 			"sourceIndexes" : 
 			[
-				30,
-				31
+				31,
+				32
 			]
 		}
 	],
@@ -963,6 +964,11 @@
 		{
 			"backtrace" : 1,
 			"path" : "src/text_fonts_glyphs.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "src/shader_configure.h",
 			"sourceGroupIndex" : 1
 		},
 		{

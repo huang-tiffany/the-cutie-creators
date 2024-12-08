@@ -34,8 +34,8 @@ private:
         glm::vec4 top_left_tr1;
 
         glm::vec4 top_left_tr2; // Triangle 2
-        glm::vec4 top_right_tr2;
         glm::vec4 bottom_right_tr2;
+        glm::vec4 top_right_tr2;
     };
 
     struct Message_Parent
@@ -264,15 +264,15 @@ public:
         quad.top_left_tr2.z = texcoord_top_left_x;
         quad.top_left_tr2.w = texcoord_bottom_left_y;
 
-        quad.top_right_tr2.x = start_x_current + left_bearing + width;
-        quad.top_right_tr2.y = y_pos_aligned + height;
-        quad.top_right_tr2.z = texcoord_top_right_x;
-        quad.top_right_tr2.w = texcoord_bottom_right_y;
-
         quad.bottom_right_tr2.x = start_x_current + left_bearing + width;
         quad.bottom_right_tr2.y = y_pos_aligned;
         quad.bottom_right_tr2.z = texcoord_bottom_right_x;
         quad.bottom_right_tr2.w = texcoord_top_right_y;
+
+        quad.top_right_tr2.x = start_x_current + left_bearing + width;
+        quad.top_right_tr2.y = y_pos_aligned + height;
+        quad.top_right_tr2.z = texcoord_top_right_x;
+        quad.top_right_tr2.w = texcoord_bottom_right_y;
         // --------------------------------------------------------------
         // std::cout << "\n   CHARACTER: " << new_message.message_string.c_str()[index] << " --- start_x_current: " << start_x_current << " --- y_pos_aligned: " << y_pos_aligned << " --- width: " << width << " --- height: " << height;
         // std::cout << "\n  texcoord_top_left_x: " << texcoord_top_left_x;

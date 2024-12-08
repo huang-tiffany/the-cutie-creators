@@ -442,8 +442,8 @@
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/settings.cpp
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shapes/sphere.h
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/utils/shaderloader.h
-/Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shapes/cone.h
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/main.cpp
+/Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shapes/cone.h
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/utils/aspectratiowidget/aspectratiowidget.hpp
  mmc:Q_OBJECT
  mdp:/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/Availability.h
@@ -691,8 +691,9 @@
  mdp:/Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qtwidgetsexports.h
  mdp:/Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qtwidgetsglobal.h
  mdp:/Users/Tiffany/Qt/6.7.3/macos/lib/QtWidgets.framework/Versions/A/Headers/qwidget.h
-/Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shapes/cylinder.h
+/Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shader_configure.h
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/utils/scenefilereader.cpp
+/Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shapes/cylinder.h
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/realtime.cpp
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/shapes/cone.cpp
 /Users/Tiffany/Desktop/csci1230/the-cutie-creators/src/realtimescene.cpp

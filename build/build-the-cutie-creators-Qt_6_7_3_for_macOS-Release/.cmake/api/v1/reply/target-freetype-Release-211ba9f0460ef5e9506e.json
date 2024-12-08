@@ -243,11 +243,11 @@
 	"dependencies" : 
 	[
 		{
-			"id" : "freetype_autogen_timestamp_deps::@96957e95d729942f8bb0"
-		},
-		{
 			"backtrace" : 0,
 			"id" : "freetype_autogen::@96957e95d729942f8bb0"
+		},
+		{
+			"id" : "freetype_autogen_timestamp_deps::@96957e95d729942f8bb0"
 		}
 	],
 	"id" : "freetype::@96957e95d729942f8bb0",

@@ -14,6 +14,7 @@
 
 FT_Library m_free_type;
 Text* m_text;
+float m_start_pos;
 
 Realtime::Realtime(QWidget *parent)
     : QOpenGLWidget(parent),
@@ -85,19 +86,34 @@ void Realtime::initializeGL() {
 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE); // Anti-aliasing
+    glEnable(GL_BLEND); // GL_BLEND for OpenGL transparency which is further set within the fragment shader.
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_shader = ShaderLoader::createShaderProgram(":/resources/shaders/default.vert", ":/resources/shaders/default.frag");
     m_texture_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
 
-    sphere->updateParams(5, 5);
-    cube->updateParams(5);
-    cone->updateParams(5, 5);
-    cylinder->updateParams(5, 5);
+    // sphere->updateParams(5, 5);
+    // cube->updateParams(5);
+    // cone->updateParams(5, 5);
+    // cylinder->updateParams(5, 5);
 
-    setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
-    setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
-    setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
-    setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
+    // setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
+    // setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
+    // setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
+    // setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
+
+    FT_Error error_code = FT_Init_FreeType(&m_free_type);
+    if (error_code)
+    {
+        std::cout << "\n   Error code: " << error_code << " --- " << "An error occurred during initialising the FT_Library";
+        int keep_console_open;
+        std::cin >> keep_console_open;
+    }
+    m_text = new Text(m_free_type, size().width(), size().height(), "aasdf"); // Declare a new text object, passing in your chosen alphabet.
+    m_text->create_text_message("a", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false); // True indicates that the message will be modified.
+
+    m_text->create_text_message("aff", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -109,12 +125,18 @@ void Realtime::initializeGL() {
 
     std::vector<GLfloat> fullscreen_quad_data =
         {
-            -1.f,  1.f, 0.f, 0.f, 1.f,
-            -1.f, -1.f, 0.f, 0.f, 0.f,
-            1.f, -1.f, 0.f, 1.f, 0.f,
-            1.f,  1.f, 0.f, 1.f, 1.f,
-            -1.f,  1.f, 0.f, 0.f, 1.f,
-            1.f, -1.f, 0.f, 1.f, 0.f
+            -1.f,  1.f, 0.f,
+            0.f, 1.f,
+            -1.f, -1.f, 0.f,
+            0.f, 0.f,
+            1.f, -1.f, 0.f,
+            1.f, 0.f,
+            1.f,  1.f, 0.f,
+            1.f, 1.f,
+            -1.f,  1.f, 0.f,
+            0.f, 1.f,
+            1.f, -1.f, 0.f,
+            1.f, 0.f
         };
 
     glGenBuffers(1, &m_fullscreen_vbo);
@@ -134,8 +156,6 @@ void Realtime::initializeGL() {
     makeFBO();
 
     initFinish = true;
-
-
 }
 
 void Realtime::paintGL() {
@@ -166,7 +186,7 @@ void Realtime::paintGL() {
     //     glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
     //     glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
 
-    //     glUseProgram(m_shader);
+        glUseProgram(m_shader);
     //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
     //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
     //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
@@ -207,7 +227,8 @@ void Realtime::paintGL() {
     //     }
 
         ///
-        ///
+
+
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
 
         // glm::vec3 RGB(10.0f, 120.0f, 105.0f);
@@ -218,14 +239,10 @@ void Realtime::paintGL() {
         unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
         glUniform3fv(font_colour_loc, 1, &RGB[0]);
 
-
-        int num_replace = 3;
-        size_t vec_size = m_text->messages[0].characters_quads.size();
-        float start_pos = m_text->messages[0].start_x_current[vec_size - num_replace];
-
-        m_text->draw_messages(0);
+        m_text->draw_messages();
         m_text->draw_alphabets();
-        glBindVertexArray(0);
+
+        // glBindVertexArray(0);
     // }
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_screen_width, m_screen_height);
@@ -286,15 +303,6 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
     // glBindVertexArray(0);
     // glBindBuffer(GL_ARRAY_BUFFER,0);
 
-    FT_Error error_code = FT_Init_FreeType(&m_free_type);
-    if (error_code)
-    {
-        std::cout << "\n   Error code: " << error_code << " --- " << "An error occurred during initialising the FT_Library";
-        int keep_console_open;
-        std::cin >> keep_console_open;
-    }
-    m_text = new Text(m_free_type, 300, 300, "01234567890Get Rady.Timr:owns&ClBgfb"); // Declare a new text object, passing in your chosen alphabet.
-    m_text->create_text_message("Get Ready... Timer: 000", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, true); // True indicates that the message will be modified.
 
 }
 

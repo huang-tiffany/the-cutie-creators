@@ -105,7 +105,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "StaticGLEW::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-StaticGLEW-Release-7a71353369451dec76ce.json",
+					"jsonFile" : "target-StaticGLEW-Release-5c6fd08dd3aab0dcaff4.json",
 					"name" : "StaticGLEW",
 					"projectIndex" : 0
 				},
@@ -126,7 +126,7 @@
 				{
 					"directoryIndex" : 2,
 					"id" : "freetype::@96957e95d729942f8bb0",
-					"jsonFile" : "target-freetype-Release-9edee46350f80236bbfe.json",
+					"jsonFile" : "target-freetype-Release-211ba9f0460ef5e9506e.json",
 					"name" : "freetype",
 					"projectIndex" : 1
 				},
@@ -147,7 +147,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "the-cutie-creators::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-the-cutie-creators-Release-e486bbda4ba846ec7e3c.json",
+					"jsonFile" : "target-the-cutie-creators-Release-73004394ca28ecbdc844.json",
 					"name" : "the-cutie-creators",
 					"projectIndex" : 0
 				},
@@ -168,7 +168,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "the-cutie-creators_other_files::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-the-cutie-creators_other_files-Release-75dc489b94f69d63527f.json",
+					"jsonFile" : "target-the-cutie-creators_other_files-Release-575dbed8ba3a81058443.json",
 					"name" : "the-cutie-creators_other_files",
 					"projectIndex" : 0
 				}
