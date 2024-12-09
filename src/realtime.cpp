@@ -277,24 +277,7 @@ void Realtime::setUpScene() {
         std::cerr << "Error loading scene" << std::endl;
     }
 
-    m_data.shapes.clear();
-    for (int i = 0; i < 10; i++) { // todo: dynamic param update for num buildings/density
-        ScenePrimitive primitive;
-        primitive.type = PrimitiveType::PRIMITIVE_CUBE;
-        float r1 = (arc4random_uniform(9) + 1.f) / 5.f;
-        float r2 = (arc4random_uniform(9) + 1.f) / 5.f;
-        float r3 = (arc4random_uniform(9) + 1.f) / 5.f;
-        std::cout << r1 << std::endl;
-        std::cout << r2 << std::endl;
-        std::cout << r3 << std::endl;
-        glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(r1, r2 / 4.f, r3));
-        ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(r3 / 2.f, r2 / 2.f, r1 / 2.f));
-
-        RenderShapeData shape;
-        shape.ctm = ctm;
-        shape.primitive = primitive;
-        m_data.shapes.push_back(shape);
-    }
+    generateCity();
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
     camera = scene.getCamera();
@@ -344,6 +327,61 @@ void Realtime::sceneChanged() {
     update(); // asks for a PaintGL() call to occur
 }
 
+void Realtime::generateCity() {
+    m_data.shapes.clear();
+    for (int i = 0; i < 25; i++) { // todo: dynamic param update for num buildings/density
+        for (int j = 0; j < 25; j++) {
+            if (i % 5 != 0 && j % 10 != 0) {
+                ScenePrimitive primitive;
+                primitive.type = PrimitiveType::PRIMITIVE_CUBE;
+                float r1 = (arc4random_uniform(5) + 1.f) / 10.f;
+                float r2 = (arc4random_uniform(5) + 1.f) / 10.f;
+                float r3 = (arc4random_uniform(5) + 1.f) / 10.f;
+                // glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(r1, r2 / 4.f, r3));
+                // ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(r3 / 2.f, r2 / 2.f, r1 / 2.f));
+
+
+                glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(i / 10.f, r2 / 4.f, j / 10.f));
+                float dim1 = r3 / 10.f;
+                float dim3 = r1 / 10.f;
+                ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(dim1 + ((0.1 - dim1) / 2), r2 / 2.f, dim3 + ((0.1 - dim3) / 2)));
+                // ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(0.2, 0.2, 0.2));
+
+
+                RenderShapeData shape;
+                shape.ctm = ctm;
+                shape.primitive = primitive;
+                m_data.shapes.push_back(shape);
+
+
+
+
+
+                ScenePrimitive primitive2;
+                primitive2.type = PrimitiveType::PRIMITIVE_CUBE;
+                r1 = (arc4random_uniform(3) + 1.f) / 10.f;
+                r2 = (arc4random_uniform(3) + 1.f) / 10.f;
+                r3 = (arc4random_uniform(3) + 1.f) / 10.f;
+
+                dim1 = i / 10.f + r1;
+                dim3 = j / 10.f + r3;
+
+                if ((int) (dim1 * 10.f) % 5 != 0 && (int) (dim3 * 10.f) % 5 != 0 && dim1 < 2.5 && dim3 < 2.5) {
+                    glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 4.f, dim3));
+                    ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 2.f, r2 / 2.f));
+
+
+                    RenderShapeData shape2;
+                    shape2.ctm = ctm2;
+                    shape2.primitive = primitive2;
+                    m_data.shapes.push_back(shape2);
+                }
+            }
+
+        }
+    }
+}
+
 void Realtime::settingsChanged() {
     if (initFinish) {
         sphere->clearData();
@@ -351,18 +389,7 @@ void Realtime::settingsChanged() {
         cone->clearData();
         cylinder->clearData();
 
-        // m_data.shapes.clear();
-        // for (int i = 0; i < 5; i++) { // todo: dynamic param update for num buildings/density
-        //     ScenePrimitive primitive;
-        //     primitive.type = PrimitiveType::PRIMITIVE_CUBE;
-        //     glm::mat4 ctm = glm::mat4(); // the cumulative transformation matrix
-        //     ctm *= glm::translate(glm::mat4(1.0f), glm::vec3(5,  5, rand() % 5));
-
-        //     RenderShapeData shape;
-        //     shape.ctm = ctm;
-        //     shape.primitive = primitive;
-        //     m_data.shapes.push_back(shape);
-        // }
+        generateCity();
 
         sphere->updateParams(settings.shapeParameter1, settings.shapeParameter2);
         setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
