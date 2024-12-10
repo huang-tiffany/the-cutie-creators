@@ -61,6 +61,24 @@ void Realtime::finish() {
     exit(EXIT_SUCCESS); // Function call: exit() is a C/C++ function that performs various tasks to help clean up resources.
 }
 
+glm::mat4 rotate(const glm::mat4& mat, float angle, const glm::vec3& axis) {
+    glm::vec3 normalizedAxis = glm::normalize(axis);
+    float cosAngle = cos(angle);
+    float sinAngle = sin(angle);
+    float x = normalizedAxis.x;
+    float y = normalizedAxis.y;
+    float z = normalizedAxis.z;
+
+    glm::mat4 rotationMatrix = glm::mat4(
+        cosAngle + x * x * (1 - cosAngle), x * y * (1 - cosAngle) - z * sinAngle, x * z * (1 - cosAngle) + y * sinAngle, 0.f,
+        y * x * (1 - cosAngle) + z * sinAngle, cosAngle + y * y * (1 - cosAngle), y * z * (1 - cosAngle) - x * sinAngle, 0.f,
+        z * x * (1 - cosAngle) - y * sinAngle, z * y * (1 - cosAngle) + x * sinAngle, cosAngle + z * z * (1 - cosAngle), 0.f,
+        0.f, 0.f, 0.f, 1.f
+        );
+
+    return mat * rotationMatrix;
+}
+
 void Realtime::initializeGL() {
     m_devicePixelRatio = this->devicePixelRatio();
 
@@ -103,6 +121,7 @@ void Realtime::initializeGL() {
     setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
     setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
 
+    m_model = rotate(m_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
 
     FT_Error error_code = FT_Init_FreeType(&m_free_type);
     if (error_code)
@@ -218,6 +237,12 @@ void Realtime::paintGL() {
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
+
+        int gridSizeX = m_text->messages[m_text->messages.size() - 1].alphabet_texture_width / 10.f;
+        int gridSizeZ = m_text->messages[m_text->messages.size() - 1].alphabet_texture_height / 10.f;
+        glm::mat4 text_model = glm::translate(glm::mat4(1.0f), glm::vec3(gridSizeX / -20.f, 0, gridSizeZ / -20.f));
+
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "text_model"), 1, GL_FALSE, &m_model[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
@@ -332,8 +357,8 @@ void Realtime::setUpScene() {
     //     std::cerr << "Error loading scene" << std::endl;
     // }
 
-    m_data.cameraData.pos = glm::vec4(0.f, 1.f, 5.f, 1.f);
-    m_data.cameraData.look = glm::vec4(0.f, -1.f, -5.f, 0.f);
+    m_data.cameraData.pos = glm::vec4(0.f, 0.f, 20.f, 1.f);
+    m_data.cameraData.look = glm::vec4(0.f, 0.f, -20.f, 0.f);
     m_data.cameraData.up = glm::vec4(0, 1, 0, 0);
     m_data.cameraData.heightAngle = 30 * M_PI / 180.f;;
     m_data.globalData.ka = 0.5;
@@ -420,6 +445,7 @@ void Realtime::generateCity() {
                 float r3 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
 
                 glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(i / 10.f, r2 / 4.f, j / 10.f));
+                ctm *= glm::translate(glm::mat4(1.0f), glm::vec3(gridSizeX / -20.f, 0, gridSizeZ / -20.f));
                 float dim1 = r3 / settings.buildingHeight;
                 float dim3 = r1 / settings.buildingHeight;
                 ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(dim1 + ((0.1 - dim1) / 2), r2 / 2.f, dim3 + ((0.1 - dim3) / 2)));
@@ -441,6 +467,7 @@ void Realtime::generateCity() {
 
                     if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundaryX && dim3 < gridUpperBoundaryZ) {
                         glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 6.f, dim3));
+                        ctm2 *= glm::translate(glm::mat4(1.0f), glm::vec3(gridSizeX / -20.f, 0, gridSizeZ / -20.f));
                         ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 3.f, r2 / 3.f, r3 / 3.f));
                         RenderShapeData shape2;
                         shape2.ctm = ctm2;
@@ -537,24 +564,6 @@ void Realtime::paintTexture(GLuint texture, bool togglePerPixelTexture, bool tog
     glUseProgram(0);
 }
 
-glm::mat4 rotate(const glm::mat4& mat, float angle, const glm::vec3& axis) {
-    glm::vec3 normalizedAxis = glm::normalize(axis);
-    float cosAngle = cos(angle);
-    float sinAngle = sin(angle);
-    float x = normalizedAxis.x;
-    float y = normalizedAxis.y;
-    float z = normalizedAxis.z;
-
-    glm::mat4 rotationMatrix = glm::mat4(
-        cosAngle + x * x * (1 - cosAngle), x * y * (1 - cosAngle) - z * sinAngle, x * z * (1 - cosAngle) + y * sinAngle, 0.f,
-        y * x * (1 - cosAngle) + z * sinAngle, cosAngle + y * y * (1 - cosAngle), y * z * (1 - cosAngle) - x * sinAngle, 0.f,
-        z * x * (1 - cosAngle) - y * sinAngle, z * y * (1 - cosAngle) + x * sinAngle, cosAngle + z * z * (1 - cosAngle), 0.f,
-        0.f, 0.f, 0.f, 1.f
-        );
-
-    return mat * rotationMatrix;
-}
-
 void Realtime::keyPressEvent(QKeyEvent *event) {
     m_keyMap[Qt::Key(event->key())] = true;
 }
@@ -584,31 +593,64 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
         int deltaY = posY - m_prev_mouse_pos.y;
         m_prev_mouse_pos = glm::vec2(posX, posY);
 
-        float xChange = deltaX * 0.2f;
-        float yChange = deltaY * 0.2f;
+        float xChange = deltaX * -0.01f;
+        float yChange = deltaY * -0.01f;
 
-        glm::vec3 look = glm::vec3(m_data.cameraData.look);
-        glm::mat4 cameraMatrix = glm::mat4(1.0f);
-        cameraMatrix = rotate(cameraMatrix, glm::radians(xChange), glm::vec3(0.0f, 1.0f, 0.0f));
+        // glm::vec3 look = glm::vec3(m_data.cameraData.look);
+        m_model = rotate(m_model, -xChange, glm::vec3(0.0f, 0.f, 1.0f));
 
-        look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
-        glm::vec3 up = glm::vec3(m_data.cameraData.up);
-        up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
+        // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
+        glm::vec3 up = glm::vec3(0, 1, 0);
+        // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
 
-        glm::vec3 rightDirection = glm::normalize(glm::cross(look, up));
-        cameraMatrix = rotate(glm::mat4(1.0f), glm::radians(yChange), rightDirection);
-        look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
-        up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
+        m_model = rotate(m_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
+        // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
+        // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
 
-        m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
-        m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
+        // m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
+        // m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
 
-        RealtimeScene scene{ size().width(), size().height(), m_data };
-        camera = scene.getCamera();
+        // RealtimeScene scene{ size().width(), size().height(), m_data };
+        // camera = scene.getCamera();
 
         update(); // asks for a PaintGL() call to occur
     }
 }
+
+
+// void Realtime::mouseMoveEvent(QMouseEvent *event) {
+//     if (m_mouseDown) {
+//         int posX = event->position().x();
+//         int posY = event->position().y();
+//         int deltaX = posX - m_prev_mouse_pos.x;
+//         int deltaY = posY - m_prev_mouse_pos.y;
+//         m_prev_mouse_pos = glm::vec2(posX, posY);
+
+//         float xChange = deltaX * 0.2f;
+//         float yChange = deltaY * 0.2f;
+
+//         glm::vec3 look = glm::vec3(m_data.cameraData.look);
+//         glm::mat4 cameraMatrix = glm::mat4(1.0f);
+//         cameraMatrix = rotate(cameraMatrix, glm::radians(xChange), glm::vec3(0.0f, 1.0f, 0.0f));
+
+//         look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
+//         glm::vec3 up = glm::vec3(m_data.cameraData.up);
+//         up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
+
+//         glm::vec3 rightDirection = glm::normalize(glm::cross(look, up));
+//         cameraMatrix = rotate(glm::mat4(1.0f), glm::radians(yChange), rightDirection);
+//         look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
+//         up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
+
+//         m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
+//         m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
+
+//         RealtimeScene scene{ size().width(), size().height(), m_data };
+//         camera = scene.getCamera();
+
+//         update(); // asks for a PaintGL() call to occur
+//     }
+// }
 
 void Realtime::timerEvent(QTimerEvent *event) {
     int elapsedms   = m_elapsedTimer.elapsed();
@@ -707,34 +749,3 @@ void Realtime::saveViewportImage(std::string filePath) {
     glDeleteFramebuffers(1, &fbo);
 }
 
-// void Realtime::mouseMoveEvent(QMouseEvent *event) {
-//     if (m_mouseDown) {
-//         int posX = event->position().x();
-//         int posY = event->position().y();
-//         int deltaX = posX - m_prev_mouse_pos.x;
-//         int deltaY = posY - m_prev_mouse_pos.y;
-//         m_prev_mouse_pos = glm::vec2(posX, posY);
-
-//         float xChange = deltaX * -0.01f;
-//         float yChange = deltaY * -0.01f;
-
-//         // glm::vec3 look = glm::vec3(m_data.cameraData.look);
-//         m_model = rotate(m_model, xChange, glm::vec3(0.0f, 1.0f, 0.0f));
-
-//         // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
-//         glm::vec3 up = glm::vec3(0, 1, 0);
-//         // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
-
-//         m_model = rotate(m_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
-//         // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
-//         // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
-
-//         // m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
-//         // m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
-
-//         // RealtimeScene scene{ size().width(), size().height(), m_data };
-//         // camera = scene.getCamera();
-
-//         update(); // asks for a PaintGL() call to occur
-//     }
-// }
