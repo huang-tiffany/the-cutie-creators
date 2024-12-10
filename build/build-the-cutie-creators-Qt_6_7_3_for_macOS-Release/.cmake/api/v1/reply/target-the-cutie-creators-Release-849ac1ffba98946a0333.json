@@ -541,15 +541,15 @@
 	"dependencies" : 
 	[
 		{
-			"backtrace" : 0,
-			"id" : "the-cutie-creators_autogen::@6890427a1f51a3e7e1df"
+			"backtrace" : 2,
+			"id" : "StaticGLEW::@6890427a1f51a3e7e1df"
 		},
 		{
 			"id" : "the-cutie-creators_autogen_timestamp_deps::@6890427a1f51a3e7e1df"
 		},
 		{
-			"backtrace" : 2,
-			"id" : "StaticGLEW::@6890427a1f51a3e7e1df"
+			"backtrace" : 0,
+			"id" : "the-cutie-creators_autogen::@6890427a1f51a3e7e1df"
 		}
 	],
 	"id" : "the-cutie-creators::@6890427a1f51a3e7e1df",

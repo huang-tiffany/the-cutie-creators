@@ -23,6 +23,10 @@ uniform float shininess;
 uniform vec4 cameraPos;
 
 void main() {
+    vec3 newWorldPos = worldPosition;
+    newWorldPos[1] = 0;
+
+    if (newWorldPos[0] > 0.5 && newWorldPos[0] < 0.75) {
     fragColor = ka * cAmbient;
     for (int i = 0; i < numLights; ++i) {
         float att = 1.f;
@@ -61,4 +65,7 @@ void main() {
         fragColor += att * specular * lightColors[i] * cSpecular;
     }
     fragColor.a = 1.0;
+    } else {
+        fragColor = vec4(0, 0, 0, 1);
+    }
 }
