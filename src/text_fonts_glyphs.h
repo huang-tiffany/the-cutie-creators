@@ -533,10 +533,12 @@ private:
         glBindVertexArray(new_message.VAO_alphabet);
         glBindBuffer(GL_ARRAY_BUFFER, new_message.VBO_alphabet);
 
-        glBufferData(GL_ARRAY_BUFFER, 6 * 4 * sizeof(float), &new_message.alphabet_quad, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 6 * 7 * sizeof(float), &new_message.alphabet_quad, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void *>(0));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void*>(4 * sizeof(GLfloat)));
 
         glBindVertexArray(0);
     }

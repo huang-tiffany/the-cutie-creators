@@ -169,84 +169,87 @@ void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // for (RenderShapeData shape : m_data.shapes) {
-    //     glBindVertexArray(m_vao_cube);
+    for (RenderShapeData shape : m_data.shapes) {
+        glBindVertexArray(m_vao_cube);
 
-    //     switch (shape.primitive.type) {
-    //     case PrimitiveType::PRIMITIVE_SPHERE:
-    //         glBindVertexArray(m_vao_sphere);
-    //         break;
-    //     case PrimitiveType::PRIMITIVE_CUBE:
-    //         glBindVertexArray(m_vao_cube);
-    //         break;
-    //     case PrimitiveType::PRIMITIVE_CONE:
-    //         glBindVertexArray(m_vao_cone);
-    //         break;
-    //     case PrimitiveType::PRIMITIVE_CYLINDER:
-    //         glBindVertexArray(m_vao_cylinder);
-    //         break;
-    //     case PrimitiveType::PRIMITIVE_MESH:
-    //         break;
-    //     }
+        switch (shape.primitive.type) {
+        case PrimitiveType::PRIMITIVE_SPHERE:
+            glBindVertexArray(m_vao_sphere);
+            break;
+        case PrimitiveType::PRIMITIVE_CUBE:
+            glBindVertexArray(m_vao_cube);
+            break;
+        case PrimitiveType::PRIMITIVE_CONE:
+            glBindVertexArray(m_vao_cone);
+            break;
+        case PrimitiveType::PRIMITIVE_CYLINDER:
+            glBindVertexArray(m_vao_cylinder);
+            break;
+        case PrimitiveType::PRIMITIVE_MESH:
+            break;
+        }
 
-    //     // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
-    //     // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
-    //     // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
+        // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
+        // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
+        // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
 
 
-    //     glm::vec4 cAmbient(1, 1, 1, 1);
-    //     glm::vec4 cDiffuse(1, 1, 1, 1);
-    //     glm::vec4 cSpecular(1, 1, 1, 1);
+        glm::vec4 cAmbient(1, 1, 1, 1);
+        glm::vec4 cDiffuse(1, 1, 1, 1);
+        glm::vec4 cSpecular(1, 1, 1, 1);
 
         glUseProgram(m_shader);
-    //     // glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
-    //     glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
-    //     glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
-    //     glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 8, &m_lightPos[0][0]);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 8, &m_lightDir[0][0]);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 8, &m_lightColors[0][0]);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "cAmbient"), 1, &cAmbient[0]);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "cDiffuse"), 1, &cDiffuse[0]);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "cSpecular"), 1, &cSpecular[0]);
-    //     glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 8, &m_lightType[0]);
-    //     glUniform1fv(glGetUniformLocation(m_shader, "a"), 8, &m_a[0]);
-    //     glUniform1fv(glGetUniformLocation(m_shader, "b"), 8, &m_b[0]);
-    //     glUniform1fv(glGetUniformLocation(m_shader, "c"), 8, &m_c[0]);
-    //     glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
-    //     glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
-    //     glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
-    //     // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
-    //     glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
-    //     glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+        glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
+        glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
+        glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 8, &m_lightPos[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 8, &m_lightDir[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 8, &m_lightColors[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cAmbient"), 1, &cAmbient[0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cDiffuse"), 1, &cDiffuse[0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cSpecular"), 1, &cSpecular[0]);
+        glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 8, &m_lightType[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "a"), 8, &m_a[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "b"), 8, &m_b[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "c"), 8, &m_c[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
+        glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
+        // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
+        glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
+        glUniform1i(glGetUniformLocation(m_shader, "isText"), false);
+        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
 
-    //     // switch (shape.primitive.type) {
-    //     // case PrimitiveType::PRIMITIVE_SPHERE:
-    //     //     glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
-    //     //     break;
-    //     // case PrimitiveType::PRIMITIVE_CUBE:
-    //     //     glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
-    //     //     break;
-    //     // case PrimitiveType::PRIMITIVE_CONE:
-    //     //     glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
-    //     //     break;
-    //     // case PrimitiveType::PRIMITIVE_CYLINDER:
-    //     //     glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
-    //     //     break;
-    //     // case PrimitiveType::PRIMITIVE_MESH:
-    //     //     break;
-    //     // }
+        // switch (shape.primitive.type) {
+        // case PrimitiveType::PRIMITIVE_SPHERE:
+        //     glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CUBE:
+        //     glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CONE:
+        //     glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CYLINDER:
+        //     glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_MESH:
+        //     break;
+        // }
 
-    //     // glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+        glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
-    //     glBindVertexArray(0);
-    // }
+        glBindVertexArray(0);
+    }
 
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &m_model[0][0]);
+    glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
     glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
-    // glm::vec3 RGB(10.0f, 120.0f, 105.0f);
     float RGB[3];
     RGB[0] = 10.f;
     RGB[1] = 120.f;
@@ -308,9 +311,9 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 
     // Enable and define attribute 0 to store vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void *>(0));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void*>(4 * sizeof(GLfloat)));
 
     // Clean-up bindings
     glBindVertexArray(0);
