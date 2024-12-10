@@ -32,11 +32,7 @@ private:
     void connectKernelBasedFilter();
     void connectUploadFile();
     void connectSaveImage();
-<<<<<<< HEAD
-    void connectExtraCredit();
     void connectText();
-=======
->>>>>>> main
 
     Realtime *realtime;
     AspectRatioWidget *aspectRatioWidget;
@@ -56,20 +52,12 @@ private:
     QSlider *streetDensityZSlider;
     QDoubleSpinBox *nearBox;
     QDoubleSpinBox *farBox;
-<<<<<<< HEAD
     QLineEdit *textBox;
 
-    // Extra Credit:
-    QCheckBox *ec1;
-    QCheckBox *ec2;
-    QCheckBox *ec3;
-    QCheckBox *ec4;
-=======
     QDoubleSpinBox *buildingHeightBox;
     QDoubleSpinBox *buildingIrregularityBox;
     QDoubleSpinBox *streetDensityXBox;
     QDoubleSpinBox *streetDensityZBox;
->>>>>>> main
 
 private slots:
     void onPerPixelFilter();
@@ -86,18 +74,10 @@ private slots:
     void onValChangeStreetDensityZSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
-<<<<<<< HEAD
     void onValChangeTextBox(QString newValue);
 
-    // Extra Credit:
-    void onExtraCredit1();
-    void onExtraCredit2();
-    void onExtraCredit3();
-    void onExtraCredit4();
-=======
     void onValChangeBuildingHeightBox(double newValue);
     void onValChangeBuildingIrregularityBox(double newValue);
     void onValChangeStreetDensityXBox(double newValue);
     void onValChangeStreetDensityZBox(double newValue);
->>>>>>> main
 };

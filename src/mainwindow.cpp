@@ -41,11 +41,9 @@ void MainWindow::initialize() {
     near_label->setText("Near Plane:");
     QLabel *far_label = new QLabel(); // Far plane label
     far_label->setText("Far Plane:");
-<<<<<<< HEAD
     QLabel *text_label = new QLabel(); // Text label
     text_label->setText("Text");
     text_label->setFont(font);
-=======
     QLabel *buildingHeight_label = new QLabel(); // Far plane label
     buildingHeight_label->setText("Building Height:");
     QLabel *buildingIrregularity_label = new QLabel(); // Far plane label
@@ -54,7 +52,6 @@ void MainWindow::initialize() {
     streetDensityX_label->setText("Horizontal Street Density:");
     QLabel *streetDensityZ_label = new QLabel(); // Far plane label
     streetDensityZ_label->setText("Vertical Street Density:");
->>>>>>> main
 
 
     // Create checkbox for per-pixel filter
@@ -119,10 +116,8 @@ void MainWindow::initialize() {
     QHBoxLayout *lnear = new QHBoxLayout();
     QGroupBox *farLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lfar = new QHBoxLayout();
-<<<<<<< HEAD
     QGroupBox *textLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *ltext = new QHBoxLayout();
-=======
     QGroupBox *buildingHeightLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lbuildingHeight = new QHBoxLayout();
     QGroupBox *buildingIrregularityLayout = new QGroupBox(); // horizonal far slider alignment
@@ -131,7 +126,6 @@ void MainWindow::initialize() {
     QHBoxLayout *lstreetDensityX = new QHBoxLayout();
     QGroupBox *streetDensityZLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lstreetDensityZ = new QHBoxLayout();
->>>>>>> main
 
     // Create slider controls to control near/far planes
     nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
@@ -158,10 +152,9 @@ void MainWindow::initialize() {
     farBox->setSingleStep(0.1f);
     farBox->setValue(100.f);
 
-<<<<<<< HEAD
     textBox = new QLineEdit();
     textBox->setText("Hello World");
-=======
+
     buildingHeightSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
     buildingHeightSlider->setTickInterval(1);
     buildingHeightSlider->setMinimum(1);
@@ -209,7 +202,6 @@ void MainWindow::initialize() {
     streetDensityZBox->setMaximum(50.f);
     streetDensityZBox->setSingleStep(1.f);
     streetDensityZBox->setValue(20.f);
->>>>>>> main
 
     // Adds the slider and number box to the parameter layouts
     lnear->addWidget(nearSlider);
@@ -220,19 +212,12 @@ void MainWindow::initialize() {
     lfar->addWidget(farBox);
     farLayout->setLayout(lfar);
 
-<<<<<<< HEAD
     ltext->addWidget(textBox);
     textLayout->setLayout(ltext);
 
-    // Extra Credit:
-    ec1 = new QCheckBox();
-    ec1->setText(QStringLiteral("Extra Credit 1"));
-    ec1->setChecked(false);
-=======
     lbuildingHeight->addWidget(buildingHeightSlider);
     lbuildingHeight->addWidget(buildingHeightBox);
     buildingHeightLayout->setLayout(lbuildingHeight);
->>>>>>> main
 
     lbuildingIrregularity->addWidget(buildingIrregularitySlider);
     lbuildingIrregularity->addWidget(buildingIrregularityBox);
@@ -248,29 +233,9 @@ void MainWindow::initialize() {
 
     vLayout->addWidget(uploadFile);
     vLayout->addWidget(saveImage);
-<<<<<<< HEAD
-    vLayout->addWidget(tesselation_label);
-    vLayout->addWidget(param1_label);
-    vLayout->addWidget(p1Layout);
-    vLayout->addWidget(param2_label);
-    vLayout->addWidget(p2Layout);
-    vLayout->addWidget(camera_label);
-    vLayout->addWidget(near_label);
-    vLayout->addWidget(nearLayout);
-    vLayout->addWidget(far_label);
-    vLayout->addWidget(farLayout);
-    vLayout->addWidget(text_label);
-    vLayout->addWidget(textLayout);
-    vLayout->addWidget(filters_label);
-    vLayout->addWidget(filter1);
-    vLayout->addWidget(filter2);
-    // Extra Credit:
-    vLayout->addWidget(ec_label);
-    vLayout->addWidget(ec1);
-    vLayout->addWidget(ec2);
-    vLayout->addWidget(ec3);
-    vLayout->addWidget(ec4);
-=======
+
+
+
     // vLayout->addWidget(tesselation_label);
     // vLayout->addWidget(param1_label);
     // vLayout->addWidget(p1Layout);
@@ -281,6 +246,10 @@ void MainWindow::initialize() {
     // vLayout->addWidget(nearLayout);
     // vLayout->addWidget(far_label);
     // vLayout->addWidget(farLayout);
+
+    vLayout->addWidget(text_label);
+    vLayout->addWidget(textLayout);
+
     vLayout->addWidget(buildingHeight_label);
     vLayout->addWidget(buildingHeightLayout);
     vLayout->addWidget(buildingIrregularity_label);
@@ -292,7 +261,6 @@ void MainWindow::initialize() {
     // vLayout->addWidget(filters_label);
     // vLayout->addWidget(filter1);
     // vLayout->addWidget(filter2);
->>>>>>> main
 
     connectUIElements();
 
@@ -304,14 +272,11 @@ void MainWindow::initialize() {
     onValChangeNearBox(0.1f);
     onValChangeFarBox(100.f);
 
-<<<<<<< HEAD
     onValChangeTextBox("Hello World");
-=======
     onValChangeBuildingHeightBox(5.f);
     onValChangeBuildingIrregularityBox(2.f);
     onValChangeStreetDensityXBox(20.f);
     onValChangeStreetDensityZBox(20.f);
->>>>>>> main
 }
 
 void MainWindow::finish() {
@@ -324,14 +289,11 @@ void MainWindow::connectUIElements() {
     // connectKernelBasedFilter();
     connectUploadFile();
     connectSaveImage();
-<<<<<<< HEAD
     connectParam1();
     connectParam2();
     connectNear();
     connectFar();
     connectText();
-    connectExtraCredit();
-=======
     // connectParam1();
     // connectParam2();
     // connectNear();
@@ -340,7 +302,6 @@ void MainWindow::connectUIElements() {
     connectBuildingIrregularity();
     connectStreetDensityX();
     connectStreetDensityZ();
->>>>>>> main
 }
 
 void MainWindow::connectPerPixelFilter() {
@@ -383,17 +344,10 @@ void MainWindow::connectFar() {
             this, &MainWindow::onValChangeFarBox);
 }
 
-<<<<<<< HEAD
 void MainWindow::connectText() {
     connect(textBox, &QLineEdit::textChanged, this, &MainWindow::onValChangeTextBox);
 }
 
-void MainWindow::connectExtraCredit() {
-    connect(ec1, &QCheckBox::clicked, this, &MainWindow::onExtraCredit1);
-    connect(ec2, &QCheckBox::clicked, this, &MainWindow::onExtraCredit2);
-    connect(ec3, &QCheckBox::clicked, this, &MainWindow::onExtraCredit3);
-    connect(ec4, &QCheckBox::clicked, this, &MainWindow::onExtraCredit4);
-=======
 void MainWindow::connectBuildingHeight() {
     connect(buildingHeightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeBuildingHeightSlider);
     connect(buildingHeightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -416,7 +370,6 @@ void MainWindow::connectStreetDensityZ() {
     connect(streetDensityZSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeStreetDensityZSlider);
     connect(streetDensityZBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeStreetDensityZBox);
->>>>>>> main
 }
 
 void MainWindow::onPerPixelFilter() {
@@ -514,15 +467,12 @@ void MainWindow::onValChangeFarBox(double newValue) {
     realtime->settingsChanged();
 }
 
-<<<<<<< HEAD
 void MainWindow::onValChangeTextBox(QString newValue) {
     textBox->setText(newValue);
     settings.text = textBox->text().toStdString();
     realtime->settingsChanged();
 }
 
-// Extra Credit:
-=======
 void MainWindow::onValChangeBuildingHeightSlider(int newValue) {
     //farSlider->setValue(newValue);
     buildingHeightBox->setValue(newValue/100.f);
@@ -550,7 +500,6 @@ void MainWindow::onValChangeBuildingIrregularityBox(double newValue) {
     settings.buildingIrregularity = buildingIrregularityBox->value();
     realtime->settingsChanged();
 }
->>>>>>> main
 
 void MainWindow::onValChangeStreetDensityXSlider(int newValue) {
     //farSlider->setValue(newValue);
