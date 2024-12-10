@@ -148,7 +148,7 @@ void MainWindow::initialize() {
     heightBox = new QDoubleSpinBox();
     heightBox->setMinimum(1.f);
     heightBox->setMaximum(10.f);
-    heightBox->setSingleStep(0.1f);
+    heightBox->setSingleStep(1.f);
     heightBox->setValue(5.f);
 
     // Adds the slider and number box to the parameter layouts

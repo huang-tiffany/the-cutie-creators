@@ -128,6 +128,7 @@ void Realtime::initializeGL() {
 
     initFinish = true;
 
+    setUpScene();
 }
 
 void Realtime::paintGL() {
@@ -272,10 +273,28 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 
 void Realtime::setUpScene() {
     m_data = RenderData();
-    bool success = SceneParser::parse(settings.sceneFilePath, m_data);
-    if (!success) {
-        std::cerr << "Error loading scene" << std::endl;
-    }
+    // bool success = SceneParser::parse(settings.sceneFilePath, m_data);
+    // if (!success) {
+    //     std::cerr << "Error loading scene" << std::endl;
+    // }
+
+    m_data.cameraData.pos = glm::vec4(3.f, 3.f, 3.f, 1.f);
+    m_data.cameraData.look = glm::vec4(-3.f, -3.f, -3.f, 0.f);
+    m_data.cameraData.up = glm::vec4(0, 1, 0, 0);
+    m_data.cameraData.heightAngle = 30 * M_PI / 180.f;;
+    m_data.globalData.ka = 0.5;
+    m_data.globalData.kd = 0.5;
+    m_data.globalData.ks = 0.5;
+    m_data.globalData.kt = 0.5;
+
+
+    glm::vec4 dir = glm::vec4(-3.f, -2.f, -1.f, 0.f);
+    SceneLightData lightData;
+    lightData.id = 1;
+    lightData.type = LightType::LIGHT_DIRECTIONAL;
+    lightData.color = glm::vec4(1, 1, 1, 1);
+    lightData.dir = dir;
+    m_data.lights.push_back(lightData);
 
     generateCity();
 
@@ -331,7 +350,7 @@ void Realtime::generateCity() {
     m_data.shapes.clear();
     for (int i = 0; i < 25; i++) { // todo: dynamic param update for num buildings/density
         for (int j = 0; j < 25; j++) {
-            if (i % 5 != 0 && j % 10 != 0) {
+            if (i % 5 != 0 && j % 5 != 0) {
                 ScenePrimitive primitive;
                 primitive.type = PrimitiveType::PRIMITIVE_CUBE;
                 float r1 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
@@ -342,8 +361,8 @@ void Realtime::generateCity() {
 
 
                 glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(i / 10.f, r2 / 4.f, j / 10.f));
-                float dim1 = r3 / 10.f;
-                float dim3 = r1 / 10.f;
+                float dim1 = r3 / settings.buildingHeight;
+                float dim3 = r1 / settings.buildingHeight;
                 ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(dim1 + ((0.1 - dim1) / 2), r2 / 2.f, dim3 + ((0.1 - dim3) / 2)));
                 // ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(0.2, 0.2, 0.2));
 
@@ -368,7 +387,7 @@ void Realtime::generateCity() {
 
                 if ((int) (dim1 * 10.f) % 5 != 0 && (int) (dim3 * 10.f) % 5 != 0 && dim1 < 2.5 && dim3 < 2.5) {
                     glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 4.f, dim3));
-                    ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 2.f, r2 / 2.f));
+                    ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 2.f, r3 / 2.f));
 
 
                     RenderShapeData shape2;
