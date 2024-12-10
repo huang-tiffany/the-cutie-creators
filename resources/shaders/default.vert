@@ -14,6 +14,8 @@ uniform bool isText;
 out vec2 texture_coordinates;
 out vec3 texcoords_anim;
 
+uniform int alphabet_texture_width;
+uniform int alphabet_texture_height;
 
 void main(void)
 {
@@ -21,12 +23,12 @@ void main(void)
         worldPosition = vec3(model * objectPosition);
         worldNormal = mat3(transpose(inverse(model))) * normalize(objectNormal);
         gl_Position = proj * view * model * objectPosition;
-        texture_coordinates = vec2(worldPosition[0] / 15, worldPosition[2] / 15); // Same as using z and w... i.e. vertex.zw
+        texture_coordinates = vec2(worldPosition[0] / float(alphabet_texture_width / 100.f), worldPosition[2] / float(alphabet_texture_height / 100.f)); // Same as using z and w... i.e. vertex.zw
     } else {
         // Enable this line for 2D window-positioned text
         // -------------------------------------------------------------
-        gl_Position = proj * view * model * vec4(objectPosition.xy, 0.0, 1.0);
-        texture_coordinates = vec2(objectPosition[2], objectPosition[3]); // Same as using z and w... i.e. vertex.zw
+        // gl_Position = vec4(objectPosition.xy, 0.0, 1.0);
+        // texture_coordinates = vec2(objectPosition[2], objectPosition[3]); // Same as using z and w... i.e. vertex.zw
     }
 
 

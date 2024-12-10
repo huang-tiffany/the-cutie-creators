@@ -10,10 +10,6 @@
 #include "utils/shaderloader.h"
 #include "utils/sceneparser.h"
 
-FT_Library m_free_type;
-Text* m_text;
-float m_start_pos;
-
 // ================== Project 5: Lights, Camera
 
 Realtime::Realtime(QWidget *parent)
@@ -59,6 +55,7 @@ void Realtime::finish() {
 
     FT_Done_Face(m_text->face);
     FT_Done_FreeType(m_free_type);
+    free(m_text);
     glDeleteProgram(m_shader);
 
     exit(EXIT_SUCCESS); // Function call: exit() is a C/C++ function that performs various tasks to help clean up resources.
@@ -114,10 +111,10 @@ void Realtime::initializeGL() {
         int keep_console_open;
         std::cin >> keep_console_open;
     }
-    m_text = new Text(m_free_type, size().width(), size().height(), "hi! world  qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/"); // Declare a new text object, passing in your chosen alphabet.
+
+    // qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/
+    m_text = new Text(m_free_type, size().width(), size().height(), settings.text); // Declare a new text object, passing in your chosen alphabet.
     m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
-
-
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -176,6 +173,8 @@ void Realtime::paintGL() {
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &m_model[0][0]);
     glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
     glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
     float RGB[3];
     RGB[0] = 10.f;
     RGB[1] = 120.f;
@@ -217,6 +216,8 @@ void Realtime::paintGL() {
 
         glUseProgram(m_shader);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
@@ -331,8 +332,8 @@ void Realtime::setUpScene() {
     //     std::cerr << "Error loading scene" << std::endl;
     // }
 
-    m_data.cameraData.pos = glm::vec4(3.f, 3.f, 3.f, 1.f);
-    m_data.cameraData.look = glm::vec4(-3.f, -3.f, -3.f, 0.f);
+    m_data.cameraData.pos = glm::vec4(0.f, 1.f, 5.f, 1.f);
+    m_data.cameraData.look = glm::vec4(0.f, -1.f, -5.f, 0.f);
     m_data.cameraData.up = glm::vec4(0, 1, 0, 0);
     m_data.cameraData.heightAngle = 30 * M_PI / 180.f;;
     m_data.globalData.ka = 0.5;
@@ -402,13 +403,15 @@ void Realtime::sceneChanged() {
 void Realtime::generateCity() {
     m_data.shapes.clear();
 
-    int gridSize = 25;
-    float gridUpperBoundary = gridSize / 10.f;
-    int streetDensityX = gridSize / (gridSize * (settings.streetDensityX / 100.f));
-    int streetDensityZ = gridSize / (gridSize * (settings.streetDensityZ / 100.f));
+    int gridSizeX = m_text->messages[m_text->messages.size() - 1].alphabet_texture_width / 10.f;
+    int gridSizeZ = m_text->messages[m_text->messages.size() - 1].alphabet_texture_height / 10.f;
+    float gridUpperBoundaryX = gridSizeX / 10.f;
+    float gridUpperBoundaryZ = gridSizeZ / 10.f;
+    int streetDensityX = gridSizeX / (gridSizeX * (settings.streetDensityX / 100.f));
+    int streetDensityZ = gridSizeZ / (gridSizeZ * (settings.streetDensityZ / 100.f));
 
-    for (int i = 0; i < gridSize; i++) {
-        for (int j = 0; j < gridSize; j++) {
+    for (int i = 0; i < gridSizeX; i++) {
+        for (int j = 0; j < gridSizeZ; j++) {
             if (i % streetDensityX != 0 && j % streetDensityZ != 0) {
                 ScenePrimitive primitive;
                 primitive.type = PrimitiveType::PRIMITIVE_CUBE;
@@ -436,7 +439,7 @@ void Realtime::generateCity() {
                     dim1 = i / 10.f + r1;
                     dim3 = j / 10.f + r3;
 
-                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundary && dim3 < gridUpperBoundary) {
+                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundaryX && dim3 < gridUpperBoundaryZ) {
                         glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 6.f, dim3));
                         ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 3.f, r2 / 3.f, r3 / 3.f));
                         RenderShapeData shape2;
@@ -457,6 +460,10 @@ void Realtime::settingsChanged() {
         cube->clearData();
         cone->clearData();
         cylinder->clearData();
+
+        free(m_text);
+        m_text = new Text(m_free_type, size().width(), size().height(), settings.text); // Declare a new text object, passing in your chosen alphabet.
+        m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
 
         generateCity();
 
@@ -483,8 +490,6 @@ void Realtime::settingsChanged() {
                            0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
                            0.f, 0.f, 1.f / settings.farPlane, 0.f,
                            0.f, 0.f, 0.f, 1.f);
-
-        m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
     }
     update(); // asks for a PaintGL() call to occur
 }

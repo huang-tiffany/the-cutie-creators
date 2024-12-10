@@ -79,7 +79,7 @@ private:
     float scale_pixels_x_to_OpenGL = 0.0f; // OpenGL [-1, 1] (i.e. 2) divided by the number of screen pixels.
     float scale_pixels_y_to_OpenGL = 0.0f;
 
-    int character_row_limit = 15; // Alphabet character row limit.
+    int character_row_limit = 150; // Alphabet character row limit.
     int alphabet_padding = 7; // Padding is optional (it spaces out the alphabet characters, without affecting each message's character spacing)
     // Note: if character background is slightly opaque e.g. 0.1 = vec4(1, 1, 1, texture(text_Texture, texture_coordinates).r) + 0.1, then spaces, i.e. simply " " show as a: alphabet_padding * alphabet_padding square.
 

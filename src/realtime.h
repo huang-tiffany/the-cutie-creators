@@ -114,6 +114,9 @@ private:
     GLuint m_fbo_texture;
     GLuint m_fbo_renderbuffer;
 
+    FT_Library m_free_type;
+    Text* m_text;
+
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 
         int newStride = int(stride / 4);

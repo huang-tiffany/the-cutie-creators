@@ -77,6 +77,7 @@ void main() {
         }
 
     } else {
+        discard;
 
     // Enable this if-statement for 2D window-positioned text
     // -------------------------------------------------------------------------
@@ -96,7 +97,7 @@ void main() {
      //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
      // }
 
-    fragColor = vec4(font_colour / 255, texture_value);
+    // fragColor = vec4(font_colour / 255, texture_value);
 
     // Enable these three lines instead for 3D animated text
     // ----------------------------------------------------------------------
