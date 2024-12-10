@@ -44,6 +44,8 @@ void MainWindow::initialize() {
     near_label->setText("Near Plane:");
     QLabel *far_label = new QLabel(); // Far plane label
     far_label->setText("Far Plane:");
+    QLabel *height_label = new QLabel(); // Far plane label
+    height_label->setText("Building Height:");
 
 
 
@@ -109,6 +111,8 @@ void MainWindow::initialize() {
     QHBoxLayout *lnear = new QHBoxLayout();
     QGroupBox *farLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lfar = new QHBoxLayout();
+    QGroupBox *heightLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lheight = new QHBoxLayout();
 
     // Create slider controls to control near/far planes
     nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
@@ -135,6 +139,18 @@ void MainWindow::initialize() {
     farBox->setSingleStep(0.1f);
     farBox->setValue(100.f);
 
+    heightSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    heightSlider->setTickInterval(1);
+    heightSlider->setMinimum(1);
+    heightSlider->setMaximum(1000);
+    heightSlider->setValue(10);
+
+    heightBox = new QDoubleSpinBox();
+    heightBox->setMinimum(1.f);
+    heightBox->setMaximum(10.f);
+    heightBox->setSingleStep(0.1f);
+    heightBox->setValue(5.f);
+
     // Adds the slider and number box to the parameter layouts
     lnear->addWidget(nearSlider);
     lnear->addWidget(nearBox);
@@ -143,6 +159,10 @@ void MainWindow::initialize() {
     lfar->addWidget(farSlider);
     lfar->addWidget(farBox);
     farLayout->setLayout(lfar);
+
+    lheight->addWidget(heightSlider);
+    lheight->addWidget(heightBox);
+    heightLayout->setLayout(lheight);
 
     // Extra Credit:
     ec1 = new QCheckBox();
@@ -173,6 +193,8 @@ void MainWindow::initialize() {
     vLayout->addWidget(nearLayout);
     vLayout->addWidget(far_label);
     vLayout->addWidget(farLayout);
+    vLayout->addWidget(height_label);
+    vLayout->addWidget(heightLayout);
     vLayout->addWidget(filters_label);
     vLayout->addWidget(filter1);
     vLayout->addWidget(filter2);
@@ -191,7 +213,9 @@ void MainWindow::initialize() {
 
     // Set default values for near and far planes
     onValChangeNearBox(0.1f);
-    onValChangeFarBox(10.f);
+    onValChangeFarBox(100.f);
+
+    onValChangeHeightBox(5.f);
 }
 
 void MainWindow::finish() {
@@ -208,6 +232,7 @@ void MainWindow::connectUIElements() {
     connectParam2();
     connectNear();
     connectFar();
+    connectHeight();
     connectExtraCredit();
 }
 
@@ -249,6 +274,12 @@ void MainWindow::connectFar() {
     connect(farSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeFarSlider);
     connect(farBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeFarBox);
+}
+
+void MainWindow::connectHeight() {
+    connect(heightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeHeightSlider);
+    connect(heightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeHeightBox);
 }
 
 void MainWindow::connectExtraCredit() {
@@ -350,6 +381,20 @@ void MainWindow::onValChangeFarBox(double newValue) {
     farSlider->setValue(int(newValue*100.f));
     //farBox->setValue(newValue);
     settings.farPlane = farBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeHeightSlider(int newValue) {
+    //farSlider->setValue(newValue);
+    heightBox->setValue(newValue/100.f);
+    settings.buildingHeight = heightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeHeightBox(double newValue) {
+    heightSlider->setValue(int(newValue*100.f));
+    //farBox->setValue(newValue);
+    settings.buildingHeight = heightBox->value();
     realtime->settingsChanged();
 }
 

@@ -23,6 +23,7 @@ private:
     void connectParam2();
     void connectNear();
     void connectFar();
+    void connectHeight();
     void connectPerPixelFilter();
     void connectKernelBasedFilter();
     void connectUploadFile();
@@ -41,8 +42,10 @@ private:
     QSpinBox *p2Box;
     QSlider *nearSlider;
     QSlider *farSlider;
+    QSlider *heightSlider;
     QDoubleSpinBox *nearBox;
     QDoubleSpinBox *farBox;
+    QDoubleSpinBox *heightBox;
 
     // Extra Credit:
     QCheckBox *ec1;
@@ -59,8 +62,10 @@ private slots:
     void onValChangeP2(int newValue);
     void onValChangeNearSlider(int newValue);
     void onValChangeFarSlider(int newValue);
+    void onValChangeHeightSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
+    void onValChangeHeightBox(double newValue);
 
     // Extra Credit:
     void onExtraCredit1();

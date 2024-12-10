@@ -334,9 +334,9 @@ void Realtime::generateCity() {
             if (i % 5 != 0 && j % 10 != 0) {
                 ScenePrimitive primitive;
                 primitive.type = PrimitiveType::PRIMITIVE_CUBE;
-                float r1 = (arc4random_uniform(5) + 1.f) / 10.f;
-                float r2 = (arc4random_uniform(5) + 1.f) / 10.f;
-                float r3 = (arc4random_uniform(5) + 1.f) / 10.f;
+                float r1 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
+                float r2 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
+                float r3 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
                 // glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(r1, r2 / 4.f, r3));
                 // ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(r3 / 2.f, r2 / 2.f, r1 / 2.f));
 
