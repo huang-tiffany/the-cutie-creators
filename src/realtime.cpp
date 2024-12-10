@@ -348,9 +348,14 @@ void Realtime::sceneChanged() {
 
 void Realtime::generateCity() {
     m_data.shapes.clear();
-    for (int i = 0; i < 25; i++) { // todo: dynamic param update for num buildings/density
-        for (int j = 0; j < 25; j++) {
-            if (i % 5 != 0 && j % 5 != 0) {
+
+    int gridSize = 25;
+    int streetDensityX = gridSize / (gridSize * (settings.streetDensityX / 100.f));
+    int streetDensityZ = gridSize / (gridSize * (settings.streetDensityZ / 100.f));
+
+    for (int i = 0; i < gridSize; i++) { // todo: dynamic param update for num buildings/density
+        for (int j = 0; j < gridSize; j++) {
+            if (i % streetDensityX != 0 && j % streetDensityZ != 0) {
                 ScenePrimitive primitive;
                 primitive.type = PrimitiveType::PRIMITIVE_CUBE;
                 float r1 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
@@ -376,25 +381,25 @@ void Realtime::generateCity() {
 
 
 
-                ScenePrimitive primitive2;
-                primitive2.type = PrimitiveType::PRIMITIVE_CUBE;
-                r1 = (arc4random_uniform(3) + 1.f) / 10.f;
-                r2 = (arc4random_uniform(3) + 1.f) / 10.f;
-                r3 = (arc4random_uniform(3) + 1.f) / 10.f;
+                // ScenePrimitive primitive2;
+                // primitive2.type = PrimitiveType::PRIMITIVE_CUBE;
+                // r1 = (arc4random_uniform(3) + 1.f) / 10.f;
+                // r2 = (arc4random_uniform(3) + 1.f) / 10.f;
+                // r3 = (arc4random_uniform(3) + 1.f) / 10.f;
 
-                dim1 = i / 10.f + r1;
-                dim3 = j / 10.f + r3;
+                // dim1 = i / 10.f + r1;
+                // dim3 = j / 10.f + r3;
 
-                if ((int) (dim1 * 10.f) % 5 != 0 && (int) (dim3 * 10.f) % 5 != 0 && dim1 < 2.5 && dim3 < 2.5) {
-                    glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 4.f, dim3));
-                    ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 2.f, r3 / 2.f));
+                // if ((int) (dim1 * 10.f) % 5 != 0 && (int) (dim3 * 10.f) % 5 != 0 && dim1 < 2.5 && dim3 < 2.5) {
+                //     glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 4.f, dim3));
+                //     ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 2.f, r3 / 2.f));
 
 
-                    RenderShapeData shape2;
-                    shape2.ctm = ctm2;
-                    shape2.primitive = primitive2;
-                    m_data.shapes.push_back(shape2);
-                }
+                //     RenderShapeData shape2;
+                //     shape2.ctm = ctm2;
+                //     shape2.primitive = primitive2;
+                //     m_data.shapes.push_back(shape2);
+                // }
             }
 
         }

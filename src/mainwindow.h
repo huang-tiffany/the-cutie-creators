@@ -24,6 +24,8 @@ private:
     void connectNear();
     void connectFar();
     void connectHeight();
+    void connectStreetDensityX();
+    void connectStreetDensityZ();
     void connectPerPixelFilter();
     void connectKernelBasedFilter();
     void connectUploadFile();
@@ -43,9 +45,13 @@ private:
     QSlider *nearSlider;
     QSlider *farSlider;
     QSlider *heightSlider;
+    QSlider *streetDensityXSlider;
+    QSlider *streetDensityZSlider;
     QDoubleSpinBox *nearBox;
     QDoubleSpinBox *farBox;
     QDoubleSpinBox *heightBox;
+    QDoubleSpinBox *streetDensityXBox;
+    QDoubleSpinBox *streetDensityZBox;
 
     // Extra Credit:
     QCheckBox *ec1;
@@ -63,9 +69,13 @@ private slots:
     void onValChangeNearSlider(int newValue);
     void onValChangeFarSlider(int newValue);
     void onValChangeHeightSlider(int newValue);
+    void onValChangeStreetDensityXSlider(int newValue);
+    void onValChangeStreetDensityZSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
     void onValChangeHeightBox(double newValue);
+    void onValChangeStreetDensityXBox(double newValue);
+    void onValChangeStreetDensityZBox(double newValue);
 
     // Extra Credit:
     void onExtraCredit1();

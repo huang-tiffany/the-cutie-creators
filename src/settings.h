@@ -17,6 +17,8 @@ struct Settings {
     bool extraCredit4 = false;
 
     int buildingHeight = 1;
+    int streetDensityX = 50;
+    int streetDensityZ = 50;
 };
 
 

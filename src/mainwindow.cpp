@@ -46,7 +46,10 @@ void MainWindow::initialize() {
     far_label->setText("Far Plane:");
     QLabel *height_label = new QLabel(); // Far plane label
     height_label->setText("Building Height:");
-
+    QLabel *streetDensityX_label = new QLabel(); // Far plane label
+    streetDensityX_label->setText("Horizontal Street Density:");
+    QLabel *streetDensityZ_label = new QLabel(); // Far plane label
+    streetDensityZ_label->setText("Vertical Street Density:");
 
 
     // Create checkbox for per-pixel filter
@@ -113,6 +116,10 @@ void MainWindow::initialize() {
     QHBoxLayout *lfar = new QHBoxLayout();
     QGroupBox *heightLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lheight = new QHBoxLayout();
+    QGroupBox *streetDensityXLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lstreetDensityX = new QHBoxLayout();
+    QGroupBox *streetDensityZLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lstreetDensityZ = new QHBoxLayout();
 
     // Create slider controls to control near/far planes
     nearSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
@@ -151,6 +158,30 @@ void MainWindow::initialize() {
     heightBox->setSingleStep(1.f);
     heightBox->setValue(5.f);
 
+    streetDensityXSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    streetDensityXSlider->setTickInterval(1);
+    streetDensityXSlider->setMinimum(0);
+    streetDensityXSlider->setMaximum(5000);
+    streetDensityXSlider->setValue(2000);
+
+    streetDensityXBox = new QDoubleSpinBox();
+    streetDensityXBox->setMinimum(0.f);
+    streetDensityXBox->setMaximum(50.f);
+    streetDensityXBox->setSingleStep(1.f);
+    streetDensityXBox->setValue(20.f);
+
+    streetDensityZSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    streetDensityZSlider->setTickInterval(1);
+    streetDensityZSlider->setMinimum(0);
+    streetDensityZSlider->setMaximum(5000);
+    streetDensityZSlider->setValue(2000);
+
+    streetDensityZBox = new QDoubleSpinBox();
+    streetDensityZBox->setMinimum(0.f);
+    streetDensityZBox->setMaximum(50.f);
+    streetDensityZBox->setSingleStep(1.f);
+    streetDensityZBox->setValue(20.f);
+
     // Adds the slider and number box to the parameter layouts
     lnear->addWidget(nearSlider);
     lnear->addWidget(nearBox);
@@ -163,6 +194,14 @@ void MainWindow::initialize() {
     lheight->addWidget(heightSlider);
     lheight->addWidget(heightBox);
     heightLayout->setLayout(lheight);
+
+    lstreetDensityX->addWidget(streetDensityXSlider);
+    lstreetDensityX->addWidget(streetDensityXBox);
+    streetDensityXLayout->setLayout(lstreetDensityX);
+
+    lstreetDensityZ->addWidget(streetDensityZSlider);
+    lstreetDensityZ->addWidget(streetDensityZBox);
+    streetDensityZLayout->setLayout(lstreetDensityZ);
 
     // Extra Credit:
     ec1 = new QCheckBox();
@@ -195,6 +234,10 @@ void MainWindow::initialize() {
     vLayout->addWidget(farLayout);
     vLayout->addWidget(height_label);
     vLayout->addWidget(heightLayout);
+    vLayout->addWidget(streetDensityX_label);
+    vLayout->addWidget(streetDensityXLayout);
+    vLayout->addWidget(streetDensityZ_label);
+    vLayout->addWidget(streetDensityZLayout);
     vLayout->addWidget(filters_label);
     vLayout->addWidget(filter1);
     vLayout->addWidget(filter2);
@@ -216,6 +259,8 @@ void MainWindow::initialize() {
     onValChangeFarBox(100.f);
 
     onValChangeHeightBox(5.f);
+    onValChangeStreetDensityXBox(20.f);
+    onValChangeStreetDensityZBox(20.f);
 }
 
 void MainWindow::finish() {
@@ -233,6 +278,8 @@ void MainWindow::connectUIElements() {
     connectNear();
     connectFar();
     connectHeight();
+    connectStreetDensityX();
+    connectStreetDensityZ();
     connectExtraCredit();
 }
 
@@ -280,6 +327,18 @@ void MainWindow::connectHeight() {
     connect(heightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeHeightSlider);
     connect(heightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeHeightBox);
+}
+
+void MainWindow::connectStreetDensityX() {
+    connect(streetDensityXSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeStreetDensityXSlider);
+    connect(streetDensityXBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeStreetDensityXBox);
+}
+
+void MainWindow::connectStreetDensityZ() {
+    connect(streetDensityZSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeStreetDensityZSlider);
+    connect(streetDensityZBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeStreetDensityZBox);
 }
 
 void MainWindow::connectExtraCredit() {
@@ -395,6 +454,34 @@ void MainWindow::onValChangeHeightBox(double newValue) {
     heightSlider->setValue(int(newValue*100.f));
     //farBox->setValue(newValue);
     settings.buildingHeight = heightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeStreetDensityXSlider(int newValue) {
+    //farSlider->setValue(newValue);
+    streetDensityXBox->setValue(newValue/100.f);
+    settings.streetDensityX = streetDensityXBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeStreetDensityXBox(double newValue) {
+    streetDensityXSlider->setValue(int(newValue*100.f));
+    //farBox->setValue(newValue);
+    settings.streetDensityX = streetDensityXBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeStreetDensityZSlider(int newValue) {
+    //farSlider->setValue(newValue);
+    streetDensityZBox->setValue(newValue/100.f);
+    settings.streetDensityZ = streetDensityZBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeStreetDensityZBox(double newValue) {
+    streetDensityZSlider->setValue(int(newValue*100.f));
+    //farBox->setValue(newValue);
+    settings.streetDensityZ = streetDensityZBox->value();
     realtime->settingsChanged();
 }
 
