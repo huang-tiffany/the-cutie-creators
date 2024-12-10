@@ -23,11 +23,14 @@ private:
     void connectParam2();
     void connectNear();
     void connectFar();
+    void connectBuildingHeight();
+    void connectBuildingIrregularity();
+    void connectStreetDensityX();
+    void connectStreetDensityZ();
     void connectPerPixelFilter();
     void connectKernelBasedFilter();
     void connectUploadFile();
     void connectSaveImage();
-    void connectExtraCredit();
 
     Realtime *realtime;
     AspectRatioWidget *aspectRatioWidget;
@@ -41,14 +44,16 @@ private:
     QSpinBox *p2Box;
     QSlider *nearSlider;
     QSlider *farSlider;
+    QSlider *buildingHeightSlider;
+    QSlider *buildingIrregularitySlider;
+    QSlider *streetDensityXSlider;
+    QSlider *streetDensityZSlider;
     QDoubleSpinBox *nearBox;
     QDoubleSpinBox *farBox;
-
-    // Extra Credit:
-    QCheckBox *ec1;
-    QCheckBox *ec2;
-    QCheckBox *ec3;
-    QCheckBox *ec4;
+    QDoubleSpinBox *buildingHeightBox;
+    QDoubleSpinBox *buildingIrregularityBox;
+    QDoubleSpinBox *streetDensityXBox;
+    QDoubleSpinBox *streetDensityZBox;
 
 private slots:
     void onPerPixelFilter();
@@ -59,12 +64,14 @@ private slots:
     void onValChangeP2(int newValue);
     void onValChangeNearSlider(int newValue);
     void onValChangeFarSlider(int newValue);
+    void onValChangeBuildingHeightSlider(int newValue);
+    void onValChangeBuildingIrregularitySlider(int newValue);
+    void onValChangeStreetDensityXSlider(int newValue);
+    void onValChangeStreetDensityZSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
-
-    // Extra Credit:
-    void onExtraCredit1();
-    void onExtraCredit2();
-    void onExtraCredit3();
-    void onExtraCredit4();
+    void onValChangeBuildingHeightBox(double newValue);
+    void onValChangeBuildingIrregularityBox(double newValue);
+    void onValChangeStreetDensityXBox(double newValue);
+    void onValChangeStreetDensityZBox(double newValue);
 };

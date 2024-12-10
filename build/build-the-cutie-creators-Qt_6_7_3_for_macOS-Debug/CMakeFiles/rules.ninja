@@ -54,7 +54,7 @@ rule CXX_COMPILER__StaticGLEW_unscanned_Debug
 # Rule for linking CXX static library.
 
 rule CXX_STATIC_LIBRARY_LINKER__StaticGLEW_Debug
-  command = $PRE_LINK && /Users/Elijah/Desktop/Brown/CS1230/Qt/Tools/CMake/CMake.app/Contents/bin/cmake -E rm -f $TARGET_FILE && /usr/bin/ar qc $TARGET_FILE $LINK_FLAGS $in && /usr/bin/ranlib $TARGET_FILE && /Users/Elijah/Desktop/Brown/CS1230/Qt/Tools/CMake/CMake.app/Contents/bin/cmake -E touch $TARGET_FILE && $POST_BUILD
+  command = $PRE_LINK && /Users/Tiffany/Qt/Tools/CMake/CMake.app/Contents/bin/cmake -E rm -f $TARGET_FILE && /usr/bin/ar qc $TARGET_FILE $LINK_FLAGS $in && /usr/bin/ranlib $TARGET_FILE && /Users/Tiffany/Qt/Tools/CMake/CMake.app/Contents/bin/cmake -E touch $TARGET_FILE && $POST_BUILD
   description = Linking CXX static library $TARGET_FILE
   restat = $RESTAT
 
@@ -71,7 +71,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /Users/Elijah/Desktop/Brown/CS1230/Qt/Tools/CMake/CMake.app/Contents/bin/cmake --regenerate-during-build -S/Users/Elijah/Desktop/Brown/CS1230/the-cutie-creators -B/Users/Elijah/Desktop/Brown/CS1230/the-cutie-creators/build/build-the-cutie-creators-Qt_6_7_3_for_macOS-Debug
+  command = /Users/Tiffany/Qt/Tools/CMake/CMake.app/Contents/bin/cmake --regenerate-during-build -S/Users/Tiffany/Desktop/csci1230/the-cutie-creators -B/Users/Tiffany/Desktop/csci1230/the-cutie-creators/build/build-the-cutie-creators-Qt_6_7_3_for_macOS-Debug
   description = Re-running CMake...
   generator = 1
 
@@ -80,7 +80,7 @@ rule RERUN_CMAKE
 # Rule for cleaning additional files.
 
 rule CLEAN_ADDITIONAL
-  command = /Users/Elijah/Desktop/Brown/CS1230/Qt/Tools/CMake/CMake.app/Contents/bin/cmake -DCONFIG=$CONFIG -P CMakeFiles/clean_additional.cmake
+  command = /Users/Tiffany/Qt/Tools/CMake/CMake.app/Contents/bin/cmake -DCONFIG=$CONFIG -P CMakeFiles/clean_additional.cmake
   description = Cleaning additional files...
 
 
@@ -88,7 +88,7 @@ rule CLEAN_ADDITIONAL
 # Rule for cleaning all built files.
 
 rule CLEAN
-  command = /Users/Elijah/Desktop/Brown/CS1230/Qt/Tools/Ninja/ninja $FILE_ARG -t clean $TARGETS
+  command = /Users/Tiffany/Qt/Tools/Ninja/ninja $FILE_ARG -t clean $TARGETS
   description = Cleaning all built files...
 
 
@@ -96,6 +96,6 @@ rule CLEAN
 # Rule for printing all primary targets available.
 
 rule HELP
-  command = /Users/Elijah/Desktop/Brown/CS1230/Qt/Tools/Ninja/ninja -t targets
+  command = /Users/Tiffany/Qt/Tools/Ninja/ninja -t targets
   description = All primary targets available:
 
