@@ -49,6 +49,7 @@ private:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
+    void generateCity();
     void makeFBO();
     void paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture);
 

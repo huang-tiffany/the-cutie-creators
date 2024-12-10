@@ -76,6 +76,8 @@ void Realtime::initializeGL() {
     m_timer = startTimer(1000/60);
     m_elapsedTimer.start();
 
+    srand(time(0));
+
     // Initialize GL extension wrangler
     glewExperimental = GL_TRUE;
     GLenum err = glewInit();
@@ -154,6 +156,11 @@ void Realtime::initializeGL() {
     makeFBO();
 
     initFinish = true;
+<<<<<<< HEAD
+=======
+
+    setUpScene();
+>>>>>>> main
 }
 
 void Realtime::paintGL() {
@@ -162,6 +169,7 @@ void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+<<<<<<< HEAD
     // for (RenderShapeData shape : m_data.shapes) {
     //     switch (shape.primitive.type) {
     //     case PrimitiveType::PRIMITIVE_SPHERE:
@@ -183,10 +191,41 @@ void Realtime::paintGL() {
     //     glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
     //     glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
     //     glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
+=======
+    for (RenderShapeData shape : m_data.shapes) {
+        glBindVertexArray(m_vao_cube);
+
+        switch (shape.primitive.type) {
+        case PrimitiveType::PRIMITIVE_SPHERE:
+            glBindVertexArray(m_vao_sphere);
+            break;
+        case PrimitiveType::PRIMITIVE_CUBE:
+            glBindVertexArray(m_vao_cube);
+            break;
+        case PrimitiveType::PRIMITIVE_CONE:
+            glBindVertexArray(m_vao_cone);
+            break;
+        case PrimitiveType::PRIMITIVE_CYLINDER:
+            glBindVertexArray(m_vao_cylinder);
+            break;
+        case PrimitiveType::PRIMITIVE_MESH:
+            break;
+        }
+
+        // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
+        // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
+        // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
+
+
+        glm::vec4 cAmbient(1, 1, 1, 1);
+        glm::vec4 cDiffuse(1, 1, 1, 1);
+        glm::vec4 cSpecular(1, 1, 1, 1);
+>>>>>>> main
 
         glUseProgram(m_shader);
     //     glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+<<<<<<< HEAD
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "projection"), 1, GL_FALSE, &m_proj[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "animate"), 1, GL_FALSE, &m_model[0][0]);
     //     glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
@@ -242,6 +281,50 @@ void Realtime::paintGL() {
 
         // glBindVertexArray(0);
     // }
+=======
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
+        glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
+        glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
+        glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 8, &m_lightPos[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 8, &m_lightDir[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 8, &m_lightColors[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cAmbient"), 1, &cAmbient[0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cDiffuse"), 1, &cDiffuse[0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cSpecular"), 1, &cSpecular[0]);
+        glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 8, &m_lightType[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "a"), 8, &m_a[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "b"), 8, &m_b[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "c"), 8, &m_c[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
+        glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
+        // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
+        glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
+        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+
+        switch (shape.primitive.type) {
+        case PrimitiveType::PRIMITIVE_SPHERE:
+            glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
+            break;
+        case PrimitiveType::PRIMITIVE_CUBE:
+            glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+            break;
+        case PrimitiveType::PRIMITIVE_CONE:
+            glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
+            break;
+        case PrimitiveType::PRIMITIVE_CYLINDER:
+            glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
+            break;
+        case PrimitiveType::PRIMITIVE_MESH:
+            break;
+        }
+
+        // glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+
+        glBindVertexArray(0);
+    }
+>>>>>>> main
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_screen_width, m_screen_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -304,10 +387,30 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 
 void Realtime::setUpScene() {
     m_data = RenderData();
-    bool success = SceneParser::parse(settings.sceneFilePath, m_data);
-    if (!success) {
-        std::cerr << "Error loading scene" << std::endl;
-    }
+    // bool success = SceneParser::parse(settings.sceneFilePath, m_data);
+    // if (!success) {
+    //     std::cerr << "Error loading scene" << std::endl;
+    // }
+
+    m_data.cameraData.pos = glm::vec4(3.f, 3.f, 3.f, 1.f);
+    m_data.cameraData.look = glm::vec4(-3.f, -3.f, -3.f, 0.f);
+    m_data.cameraData.up = glm::vec4(0, 1, 0, 0);
+    m_data.cameraData.heightAngle = 30 * M_PI / 180.f;;
+    m_data.globalData.ka = 0.5;
+    m_data.globalData.kd = 0.5;
+    m_data.globalData.ks = 0.5;
+    m_data.globalData.kt = 0.5;
+
+
+    glm::vec4 dir = glm::vec4(-3.f, -2.f, -1.f, 0.f);
+    SceneLightData lightData;
+    lightData.id = 1;
+    lightData.type = LightType::LIGHT_DIRECTIONAL;
+    lightData.color = glm::vec4(1, 1, 1, 1);
+    lightData.dir = dir;
+    m_data.lights.push_back(lightData);
+
+    generateCity();
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
     camera = scene.getCamera();
@@ -357,12 +460,66 @@ void Realtime::sceneChanged() {
     update(); // asks for a PaintGL() call to occur
 }
 
+void Realtime::generateCity() {
+    m_data.shapes.clear();
+
+    int gridSize = 25;
+    float gridUpperBoundary = gridSize / 10.f;
+    int streetDensityX = gridSize / (gridSize * (settings.streetDensityX / 100.f));
+    int streetDensityZ = gridSize / (gridSize * (settings.streetDensityZ / 100.f));
+
+    for (int i = 0; i < gridSize; i++) {
+        for (int j = 0; j < gridSize; j++) {
+            if (i % streetDensityX != 0 && j % streetDensityZ != 0) {
+                ScenePrimitive primitive;
+                primitive.type = PrimitiveType::PRIMITIVE_CUBE;
+                float r1 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
+                float r2 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
+                float r3 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
+
+                glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(i / 10.f, r2 / 4.f, j / 10.f));
+                float dim1 = r3 / settings.buildingHeight;
+                float dim3 = r1 / settings.buildingHeight;
+                ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(dim1 + ((0.1 - dim1) / 2), r2 / 2.f, dim3 + ((0.1 - dim3) / 2)));
+
+                RenderShapeData shape;
+                shape.ctm = ctm;
+                shape.primitive = primitive;
+                m_data.shapes.push_back(shape);
+
+                for (int k = 0; k < settings.buildingIrregularity; k++) {
+                    ScenePrimitive primitive2;
+                    primitive2.type = PrimitiveType::PRIMITIVE_CUBE;
+                    r1 = (arc4random_uniform(2) + 1.f) / 10.f;
+                    r2 = (arc4random_uniform(3) + 1.f) / 10.f;
+                    r3 = (arc4random_uniform(4) + 1.f) / 10.f;
+
+                    dim1 = i / 10.f + r1;
+                    dim3 = j / 10.f + r3;
+
+                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundary && dim3 < gridUpperBoundary) {
+                        glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 6.f, dim3));
+                        ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 3.f, r2 / 3.f, r3 / 3.f));
+                        RenderShapeData shape2;
+                        shape2.ctm = ctm2;
+                        shape2.primitive = primitive2;
+                        m_data.shapes.push_back(shape2);
+                    }
+                }
+            }
+
+        }
+    }
+}
+
 void Realtime::settingsChanged() {
     if (initFinish) {
         sphere->clearData();
         cube->clearData();
         cone->clearData();
         cylinder->clearData();
+
+        generateCity();
 
         sphere->updateParams(settings.shapeParameter1, settings.shapeParameter2);
         setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
