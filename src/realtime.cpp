@@ -9,6 +9,7 @@
 #include "glm/gtx/transform.hpp"
 #include "utils/shaderloader.h"
 #include "utils/sceneparser.h"
+#include <random>
 
 // ================== Project 5: Lights, Camera
 
@@ -126,6 +127,8 @@ void Realtime::initializeGL() {
 
     makeFBO();
 
+    // m_worleyPointsTexture = createWorleyPointsBuffer(10, "WorleyPointsBuffer");
+
     initFinish = true;
 
     setUpScene();
@@ -136,6 +139,21 @@ void Realtime::paintGL() {
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // glBindBuffer(GL_ARRAY_BUFFER, m_worleyPointsBuffer);
+    // GLuint pointLocation = glGetAttribLocation(m_shader, "worleyPoints");
+    // glVertexAttribPointer(pointLocation, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    // glEnableVertexAttribArray(pointLocation);
+    // glDrawArrays(GL_POINTS, 0, 10 * 10 * 10);
+
+    // glActiveTexture(GL_TEXTURE0);  // Activate texture unit 0
+    // glBindTexture(GL_TEXTURE_2D, m_worleyPointsTexture); // Bind the texture
+
+    // // Pass the texture to the shader (uniform sampler2D)
+    // glUseProgram(m_shader);
+    // glm::vec2 screenSize = glm::vec2(m_screen_width, m_screen_height);
+    // glUniform2fv(glGetUniformLocation(m_shader, "screenSize"), 1, &screenSize[0]);
+    // glUniform1i(glGetUniformLocation(m_shader, "pointTexture"), 0);
 
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
@@ -475,6 +493,45 @@ void Realtime::paintTexture(GLuint texture, bool togglePerPixelTexture, bool tog
     glBindVertexArray(0);
     glUseProgram(0);
 }
+
+// GLuint Realtime::createWorleyPointsBuffer(int numCellsPerAxis, std::string bufferName) {
+//     std::vector<glm::vec3> points(pow(numCellsPerAxis, 3));
+//     float cellSize = 1.f / numCellsPerAxis;
+
+//     std::default_random_engine generator;
+//     std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+
+//     for (int x = 0; x < numCellsPerAxis; ++x) {
+//         for (int y = 0; y < numCellsPerAxis; ++y) {
+//             for (int z = 0; z < numCellsPerAxis; ++z) {
+//                 float randomX = distribution(generator);
+//                 float randomY = distribution(generator);
+//                 float randomZ = distribution(generator);
+//                 glm::vec3 randomOffset = glm::vec3(randomX, randomY, randomZ) * cellSize;
+//                 glm::vec3 cellCorner = glm::vec3(x, y, z) * cellSize;
+
+//                 int index = x + numCellsPerAxis * (y + z * numCellsPerAxis);
+//                 points[index] = cellCorner + randomOffset;
+//             }
+//         }
+//     }
+
+//     // GLuint buffer;
+//     // glGenBuffers(1, &buffer);
+//     // glBindBuffer(GL_ARRAY_BUFFER, buffer);
+//     // glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_STATIC_DRAW);
+
+//     // return buffer;
+//     GLuint texture;
+//     glGenTextures(1, &texture);
+//     glBindTexture(GL_TEXTURE_2D, texture);
+//     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, numCellsPerAxis, numCellsPerAxis * numCellsPerAxis, 0, GL_RGBA, GL_FLOAT, points.data());
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+//     return texture;
+// }
+
 
 glm::mat4 rotate(const glm::mat4& mat, float angle, const glm::vec3& axis) {
     glm::vec3 normalizedAxis = glm::normalize(axis);
