@@ -380,26 +380,27 @@ void Realtime::generateCity() {
 
 
 
+                for (int k = 0; k < settings.buildingIrregularity; k++) {
+                    ScenePrimitive primitive2;
+                    primitive2.type = PrimitiveType::PRIMITIVE_CUBE;
+                    r1 = (arc4random_uniform(2) + 1.f) / 10.f;
+                    r2 = (arc4random_uniform(3) + 1.f) / 10.f;
+                    r3 = (arc4random_uniform(4) + 1.f) / 10.f;
 
-                // ScenePrimitive primitive2;
-                // primitive2.type = PrimitiveType::PRIMITIVE_CUBE;
-                // r1 = (arc4random_uniform(3) + 1.f) / 10.f;
-                // r2 = (arc4random_uniform(3) + 1.f) / 10.f;
-                // r3 = (arc4random_uniform(3) + 1.f) / 10.f;
+                    dim1 = i / 10.f + r1;
+                    dim3 = j / 10.f + r3;
 
-                // dim1 = i / 10.f + r1;
-                // dim3 = j / 10.f + r3;
-
-                // if ((int) (dim1 * 10.f) % 5 != 0 && (int) (dim3 * 10.f) % 5 != 0 && dim1 < 2.5 && dim3 < 2.5) {
-                //     glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 4.f, dim3));
-                //     ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 2.f, r3 / 2.f));
+                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < streetDensityX / 2.f && dim3 < streetDensityZ / 2.f) {
+                        glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 6.f, dim3));
+                        ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 3.f, r3 / 4.f));
 
 
-                //     RenderShapeData shape2;
-                //     shape2.ctm = ctm2;
-                //     shape2.primitive = primitive2;
-                //     m_data.shapes.push_back(shape2);
-                // }
+                        RenderShapeData shape2;
+                        shape2.ctm = ctm2;
+                        shape2.primitive = primitive2;
+                        m_data.shapes.push_back(shape2);
+                    }
+                }
             }
 
         }
