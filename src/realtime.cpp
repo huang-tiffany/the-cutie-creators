@@ -350,10 +350,11 @@ void Realtime::generateCity() {
     m_data.shapes.clear();
 
     int gridSize = 25;
+    float gridUpperBoundary = gridSize / 10.f;
     int streetDensityX = gridSize / (gridSize * (settings.streetDensityX / 100.f));
     int streetDensityZ = gridSize / (gridSize * (settings.streetDensityZ / 100.f));
 
-    for (int i = 0; i < gridSize; i++) { // todo: dynamic param update for num buildings/density
+    for (int i = 0; i < gridSize; i++) {
         for (int j = 0; j < gridSize; j++) {
             if (i % streetDensityX != 0 && j % streetDensityZ != 0) {
                 ScenePrimitive primitive;
@@ -361,24 +362,16 @@ void Realtime::generateCity() {
                 float r1 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
                 float r2 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
                 float r3 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
-                // glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(r1, r2 / 4.f, r3));
-                // ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(r3 / 2.f, r2 / 2.f, r1 / 2.f));
-
 
                 glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(i / 10.f, r2 / 4.f, j / 10.f));
                 float dim1 = r3 / settings.buildingHeight;
                 float dim3 = r1 / settings.buildingHeight;
                 ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(dim1 + ((0.1 - dim1) / 2), r2 / 2.f, dim3 + ((0.1 - dim3) / 2)));
-                // ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(0.2, 0.2, 0.2));
-
 
                 RenderShapeData shape;
                 shape.ctm = ctm;
                 shape.primitive = primitive;
                 m_data.shapes.push_back(shape);
-
-
-
 
                 for (int k = 0; k < settings.buildingIrregularity; k++) {
                     ScenePrimitive primitive2;
@@ -390,11 +383,9 @@ void Realtime::generateCity() {
                     dim1 = i / 10.f + r1;
                     dim3 = j / 10.f + r3;
 
-                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < streetDensityX / 2.f && dim3 < streetDensityZ / 2.f) {
+                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundary && dim3 < gridUpperBoundary) {
                         glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 6.f, dim3));
-                        ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 2.f, r2 / 3.f, r3 / 4.f));
-
-
+                        ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 3.f, r2 / 3.f, r3 / 3.f));
                         RenderShapeData shape2;
                         shape2.ctm = ctm2;
                         shape2.primitive = primitive2;

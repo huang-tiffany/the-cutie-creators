@@ -55,11 +55,7 @@ constexpr auto qt_meta_stringdata_CLASSMainWindowENDCLASS = QtMocHelpers::string
     "onValChangeBuildingHeightBox",
     "onValChangeBuildingIrregularityBox",
     "onValChangeStreetDensityXBox",
-    "onValChangeStreetDensityZBox",
-    "onExtraCredit1",
-    "onExtraCredit2",
-    "onExtraCredit3",
-    "onExtraCredit4"
+    "onValChangeStreetDensityZBox"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -72,7 +68,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-      22,   14, // methods
+      18,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -80,28 +76,24 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,  146,    2, 0x08,    1 /* Private */,
-       3,    0,  147,    2, 0x08,    2 /* Private */,
-       4,    0,  148,    2, 0x08,    3 /* Private */,
-       5,    0,  149,    2, 0x08,    4 /* Private */,
-       6,    1,  150,    2, 0x08,    5 /* Private */,
-       8,    1,  153,    2, 0x08,    7 /* Private */,
-       9,    1,  156,    2, 0x08,    9 /* Private */,
-      10,    1,  159,    2, 0x08,   11 /* Private */,
-      11,    1,  162,    2, 0x08,   13 /* Private */,
-      12,    1,  165,    2, 0x08,   15 /* Private */,
-      13,    1,  168,    2, 0x08,   17 /* Private */,
-      14,    1,  171,    2, 0x08,   19 /* Private */,
-      15,    1,  174,    2, 0x08,   21 /* Private */,
-      16,    1,  177,    2, 0x08,   23 /* Private */,
-      17,    1,  180,    2, 0x08,   25 /* Private */,
-      18,    1,  183,    2, 0x08,   27 /* Private */,
-      19,    1,  186,    2, 0x08,   29 /* Private */,
-      20,    1,  189,    2, 0x08,   31 /* Private */,
-      21,    0,  192,    2, 0x08,   33 /* Private */,
-      22,    0,  193,    2, 0x08,   34 /* Private */,
-      23,    0,  194,    2, 0x08,   35 /* Private */,
-      24,    0,  195,    2, 0x08,   36 /* Private */,
+       1,    0,  122,    2, 0x08,    1 /* Private */,
+       3,    0,  123,    2, 0x08,    2 /* Private */,
+       4,    0,  124,    2, 0x08,    3 /* Private */,
+       5,    0,  125,    2, 0x08,    4 /* Private */,
+       6,    1,  126,    2, 0x08,    5 /* Private */,
+       8,    1,  129,    2, 0x08,    7 /* Private */,
+       9,    1,  132,    2, 0x08,    9 /* Private */,
+      10,    1,  135,    2, 0x08,   11 /* Private */,
+      11,    1,  138,    2, 0x08,   13 /* Private */,
+      12,    1,  141,    2, 0x08,   15 /* Private */,
+      13,    1,  144,    2, 0x08,   17 /* Private */,
+      14,    1,  147,    2, 0x08,   19 /* Private */,
+      15,    1,  150,    2, 0x08,   21 /* Private */,
+      16,    1,  153,    2, 0x08,   23 /* Private */,
+      17,    1,  156,    2, 0x08,   25 /* Private */,
+      18,    1,  159,    2, 0x08,   27 /* Private */,
+      19,    1,  162,    2, 0x08,   29 /* Private */,
+      20,    1,  165,    2, 0x08,   31 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -122,10 +114,6 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
     QMetaType::Void, QMetaType::Double,    7,
     QMetaType::Void, QMetaType::Double,    7,
     QMetaType::Void, QMetaType::Double,    7,
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
 
        0        // eod
 };
@@ -188,15 +176,7 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<double, std::false_type>,
         // method 'onValChangeStreetDensityZBox'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<double, std::false_type>,
-        // method 'onExtraCredit1'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'onExtraCredit2'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'onExtraCredit3'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'onExtraCredit4'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>
+        QtPrivate::TypeAndForceComplete<double, std::false_type>
     >,
     nullptr
 } };
@@ -225,10 +205,6 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 15: _t->onValChangeBuildingIrregularityBox((*reinterpret_cast< std::add_pointer_t<double>>(_a[1]))); break;
         case 16: _t->onValChangeStreetDensityXBox((*reinterpret_cast< std::add_pointer_t<double>>(_a[1]))); break;
         case 17: _t->onValChangeStreetDensityZBox((*reinterpret_cast< std::add_pointer_t<double>>(_a[1]))); break;
-        case 18: _t->onExtraCredit1(); break;
-        case 19: _t->onExtraCredit2(); break;
-        case 20: _t->onExtraCredit3(); break;
-        case 21: _t->onExtraCredit4(); break;
         default: ;
         }
     }
@@ -253,13 +229,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 22)
+        if (_id < 18)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 22;
+        _id -= 18;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 22)
+        if (_id < 18)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 22;
+        _id -= 18;
     }
     return _id;
 }

@@ -33,9 +33,6 @@ void MainWindow::initialize() {
     QLabel *filters_label = new QLabel(); // Filters label
     filters_label->setText("Filters");
     filters_label->setFont(font);
-    QLabel *ec_label = new QLabel(); // Extra Credit label
-    ec_label->setText("Extra Credit");
-    ec_label->setFont(font);
     QLabel *param1_label = new QLabel(); // Parameter 1 label
     param1_label->setText("Parameter 1:");
     QLabel *param2_label = new QLabel(); // Parameter 2 label
@@ -223,35 +220,18 @@ void MainWindow::initialize() {
     lstreetDensityZ->addWidget(streetDensityZBox);
     streetDensityZLayout->setLayout(lstreetDensityZ);
 
-    // Extra Credit:
-    ec1 = new QCheckBox();
-    ec1->setText(QStringLiteral("Extra Credit 1"));
-    ec1->setChecked(false);
-
-    ec2 = new QCheckBox();
-    ec2->setText(QStringLiteral("Extra Credit 2"));
-    ec2->setChecked(false);
-
-    ec3 = new QCheckBox();
-    ec3->setText(QStringLiteral("Extra Credit 3"));
-    ec3->setChecked(false);
-
-    ec4 = new QCheckBox();
-    ec4->setText(QStringLiteral("Extra Credit 4"));
-    ec4->setChecked(false);
-
     vLayout->addWidget(uploadFile);
     vLayout->addWidget(saveImage);
-    vLayout->addWidget(tesselation_label);
-    vLayout->addWidget(param1_label);
-    vLayout->addWidget(p1Layout);
-    vLayout->addWidget(param2_label);
-    vLayout->addWidget(p2Layout);
-    vLayout->addWidget(camera_label);
-    vLayout->addWidget(near_label);
-    vLayout->addWidget(nearLayout);
-    vLayout->addWidget(far_label);
-    vLayout->addWidget(farLayout);
+    // vLayout->addWidget(tesselation_label);
+    // vLayout->addWidget(param1_label);
+    // vLayout->addWidget(p1Layout);
+    // vLayout->addWidget(param2_label);
+    // vLayout->addWidget(p2Layout);
+    // vLayout->addWidget(camera_label);
+    // vLayout->addWidget(near_label);
+    // vLayout->addWidget(nearLayout);
+    // vLayout->addWidget(far_label);
+    // vLayout->addWidget(farLayout);
     vLayout->addWidget(buildingHeight_label);
     vLayout->addWidget(buildingHeightLayout);
     vLayout->addWidget(buildingIrregularity_label);
@@ -260,15 +240,9 @@ void MainWindow::initialize() {
     vLayout->addWidget(streetDensityXLayout);
     vLayout->addWidget(streetDensityZ_label);
     vLayout->addWidget(streetDensityZLayout);
-    vLayout->addWidget(filters_label);
-    vLayout->addWidget(filter1);
-    vLayout->addWidget(filter2);
-    // Extra Credit:
-    vLayout->addWidget(ec_label);
-    vLayout->addWidget(ec1);
-    vLayout->addWidget(ec2);
-    vLayout->addWidget(ec3);
-    vLayout->addWidget(ec4);
+    // vLayout->addWidget(filters_label);
+    // vLayout->addWidget(filter1);
+    // vLayout->addWidget(filter2);
 
     connectUIElements();
 
@@ -292,19 +266,18 @@ void MainWindow::finish() {
 }
 
 void MainWindow::connectUIElements() {
-    connectPerPixelFilter();
-    connectKernelBasedFilter();
+    // connectPerPixelFilter();
+    // connectKernelBasedFilter();
     connectUploadFile();
     connectSaveImage();
-    connectParam1();
-    connectParam2();
-    connectNear();
-    connectFar();
+    // connectParam1();
+    // connectParam2();
+    // connectNear();
+    // connectFar();
     connectBuildingHeight();
     connectBuildingIrregularity();
     connectStreetDensityX();
     connectStreetDensityZ();
-    connectExtraCredit();
 }
 
 void MainWindow::connectPerPixelFilter() {
@@ -369,13 +342,6 @@ void MainWindow::connectStreetDensityZ() {
     connect(streetDensityZSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeStreetDensityZSlider);
     connect(streetDensityZBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeStreetDensityZBox);
-}
-
-void MainWindow::connectExtraCredit() {
-    connect(ec1, &QCheckBox::clicked, this, &MainWindow::onExtraCredit1);
-    connect(ec2, &QCheckBox::clicked, this, &MainWindow::onExtraCredit2);
-    connect(ec3, &QCheckBox::clicked, this, &MainWindow::onExtraCredit3);
-    connect(ec4, &QCheckBox::clicked, this, &MainWindow::onExtraCredit4);
 }
 
 void MainWindow::onPerPixelFilter() {
@@ -526,27 +492,5 @@ void MainWindow::onValChangeStreetDensityZBox(double newValue) {
     streetDensityZSlider->setValue(int(newValue*100.f));
     //farBox->setValue(newValue);
     settings.streetDensityZ = streetDensityZBox->value();
-    realtime->settingsChanged();
-}
-
-// Extra Credit:
-
-void MainWindow::onExtraCredit1() {
-    settings.extraCredit1 = !settings.extraCredit1;
-    realtime->settingsChanged();
-}
-
-void MainWindow::onExtraCredit2() {
-    settings.extraCredit2 = !settings.extraCredit2;
-    realtime->settingsChanged();
-}
-
-void MainWindow::onExtraCredit3() {
-    settings.extraCredit3 = !settings.extraCredit3;
-    realtime->settingsChanged();
-}
-
-void MainWindow::onExtraCredit4() {
-    settings.extraCredit4 = !settings.extraCredit4;
     realtime->settingsChanged();
 }
