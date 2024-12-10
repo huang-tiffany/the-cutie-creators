@@ -86,6 +86,8 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
     FILES
         resources/shaders/default.frag
         resources/shaders/default.vert
+        resources/shaders/masking.frag
+        resources/shaders/masking.vert
         resources/shaders/texture.vert
         resources/shaders/texture.frag
         resources/typefaces/RubikMonoOne-Regular.ttf

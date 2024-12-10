@@ -71,6 +71,7 @@ private:
     Camera camera;
 
     GLuint m_shader; // Stores id of shader program
+    GLuint m_masking_shader;
     GLuint m_vbo_sphere;
     GLuint m_vbo_cube;
     GLuint m_vbo_cone;

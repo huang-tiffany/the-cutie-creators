@@ -93,6 +93,7 @@ void Realtime::initializeGL() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_shader = ShaderLoader::createShaderProgram(":/resources/shaders/default.vert", ":/resources/shaders/default.frag");
+    m_masking_shader = ShaderLoader::createShaderProgram(":/resources/shaders/masking.vert", ":/resources/shaders/masking.frag");
     m_texture_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
 
     sphere->updateParams(5, 5);
@@ -113,7 +114,7 @@ void Realtime::initializeGL() {
         int keep_console_open;
         std::cin >> keep_console_open;
     }
-    m_text = new Text(m_free_type, size().width(), size().height(), " qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/"); // Declare a new text object, passing in your chosen alphabet.
+    m_text = new Text(m_free_type, size().width(), size().height(), "hi! world  qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/"); // Declare a new text object, passing in your chosen alphabet.
     m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
 
 
@@ -169,6 +170,22 @@ void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glUseProgram(m_shader);
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &m_model[0][0]);
+    glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+    float RGB[3];
+    RGB[0] = 10.f;
+    RGB[1] = 120.f;
+    RGB[2] = 105.f;
+    unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
+    glUniform3fv(font_colour_loc, 1, &RGB[0]);
+
+    m_text->draw_messages(m_text->messages.size() - 1);
+
+
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
@@ -199,6 +216,7 @@ void Realtime::paintGL() {
         glm::vec4 cSpecular(1, 1, 1, 1);
 
         glUseProgram(m_shader);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
@@ -244,20 +262,6 @@ void Realtime::paintGL() {
 
         glBindVertexArray(0);
     }
-
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &m_model[0][0]);
-    glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
-    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
-    float RGB[3];
-    RGB[0] = 10.f;
-    RGB[1] = 120.f;
-    RGB[2] = 105.f;
-    unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
-    glUniform3fv(font_colour_loc, 1, &RGB[0]);
-
-    m_text->draw_messages(m_text->messages.size() - 1);
 
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
@@ -512,6 +516,7 @@ void Realtime::makeFBO(){
 
 void Realtime::paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture){
     glUseProgram(m_texture_shader);
+
     glUniform1i(glGetUniformLocation(m_texture_shader, "togglePerPixelTexture"), togglePerPixelTexture);
     glUniform1i(glGetUniformLocation(m_texture_shader, "toggleKernelTexture"), toggleKernelTexture);
     glUniform1i(glGetUniformLocation(m_texture_shader, "fboWidth"), m_fbo_width);

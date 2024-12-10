@@ -21,7 +21,7 @@ void main(void)
         worldPosition = vec3(model * objectPosition);
         worldNormal = mat3(transpose(inverse(model))) * normalize(objectNormal);
         gl_Position = proj * view * model * objectPosition;
-        texture_coordinates = vec2(worldPosition[0] / 15, worldPosition[2] / 15); // Same as using z and w... i.e. vertex.zw
+        texture_coordinates = vec2(objectPosition[0], objectPosition[2]); // Same as using z and w... i.e. vertex.zw
     } else {
         // Enable this line for 2D window-positioned text
         // -------------------------------------------------------------
