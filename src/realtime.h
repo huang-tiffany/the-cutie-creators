@@ -47,6 +47,7 @@ private:
     void timerEvent(QTimerEvent *event) override;
     void makeFBO();
     void paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture);
+    GLuint createWorleyPointsBuffer(int numCellsPerAxis, std::string bufferName);
 
     // Tick Related Variables
     int m_timer;                                        // Stores timer which attempts to run ~60 times per second
@@ -107,6 +108,9 @@ private:
     GLuint m_fbo;
     GLuint m_fbo_texture;
     GLuint m_fbo_renderbuffer;
+
+    // GLuint m_worleyPointsBuffer;
+    // GLuint m_worleyPointsTexture;
 
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 
