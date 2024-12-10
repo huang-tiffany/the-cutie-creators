@@ -184,9 +184,12 @@ void main() {
     }
     fragColor.a = 1.0;
 <<<<<<< HEAD
+<<<<<<< HEAD
     // } else {
     //     fragColor = vec4(0, 0, 0, 1);
 =======
+=======
+>>>>>>> d2fcf45a45efd2525f3af34d7585ac6dfcedcbd5
 
     if (worldPosition.y < 0.1) {
         float fog = basicFog();
@@ -199,6 +202,9 @@ void main() {
     //     vec3 samplePos = vec3(fragUV, 0.0);
     //     float noiseValue = worley(samplePos);
     //     fragColor = vec4(vec3(noiseValue), 1.0);
+<<<<<<< HEAD
 >>>>>>> d2fcf45 (basic fog)
+=======
+>>>>>>> d2fcf45a45efd2525f3af34d7585ac6dfcedcbd5
     // }
 }
