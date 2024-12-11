@@ -14,7 +14,7 @@
 
 Realtime::Realtime(QWidget *parent)
     : QOpenGLWidget(parent),
-      camera(Camera{ m_data.cameraData })
+    m_camera(Camera{ m_data.cameraData })
 {
     m_prev_mouse_pos = glm::vec2(size().width()/2, size().height()/2);
     setMouseTracking(true);
@@ -52,6 +52,31 @@ void Realtime::finish() {
     glDeleteTextures(1, &m_fbo_texture);
     glDeleteRenderbuffers(1, &m_fbo_renderbuffer);
     glDeleteFramebuffers(1, &m_fbo);
+
+    FT_Done_Face(m_text->face);
+    FT_Done_FreeType(m_free_type);
+    free(m_text);
+    glDeleteProgram(m_shader);
+
+    exit(EXIT_SUCCESS); // Function call: exit() is a C/C++ function that performs various tasks to help clean up resources.
+}
+
+glm::mat4 rotate(const glm::mat4& mat, float angle, const glm::vec3& axis) {
+    glm::vec3 normalizedAxis = glm::normalize(axis);
+    float cosAngle = cos(angle);
+    float sinAngle = sin(angle);
+    float x = normalizedAxis.x;
+    float y = normalizedAxis.y;
+    float z = normalizedAxis.z;
+
+    glm::mat4 rotationMatrix = glm::mat4(
+        cosAngle + x * x * (1 - cosAngle), x * y * (1 - cosAngle) - z * sinAngle, x * z * (1 - cosAngle) + y * sinAngle, 0.f,
+        y * x * (1 - cosAngle) + z * sinAngle, cosAngle + y * y * (1 - cosAngle), y * z * (1 - cosAngle) - x * sinAngle, 0.f,
+        z * x * (1 - cosAngle) - y * sinAngle, z * y * (1 - cosAngle) + x * sinAngle, cosAngle + z * z * (1 - cosAngle), 0.f,
+        0.f, 0.f, 0.f, 1.f
+        );
+
+    return mat * rotationMatrix;
 }
 
 void Realtime::initializeGL() {
@@ -78,6 +103,9 @@ void Realtime::initializeGL() {
 
     // Enable depth testing
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE); // Anti-aliasing
+    glEnable(GL_BLEND); // GL_BLEND for OpenGL transparency which is further set within the fragment shader.
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_shader = ShaderLoader::createShaderProgram(":/resources/shaders/default.vert", ":/resources/shaders/default.frag");
     m_texture_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
@@ -92,6 +120,22 @@ void Realtime::initializeGL() {
     setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
     setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
 
+    m_model = rotate(m_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
+
+    FT_Error error_code = FT_Init_FreeType(&m_free_type);
+    if (error_code)
+    {
+        std::cout << "\n   Error code: " << error_code << " --- " << "An error occurred during initialising the FT_Library";
+        int keep_console_open;
+        std::cin >> keep_console_open;
+    }
+
+    // qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/
+    m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
+    std::string typefaceFilepath = settings.typeface;
+    typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 120, false);
+
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -102,12 +146,18 @@ void Realtime::initializeGL() {
 
     std::vector<GLfloat> fullscreen_quad_data =
         {
-            -1.f,  1.f, 0.f, 0.f, 1.f,
-            -1.f, -1.f, 0.f, 0.f, 0.f,
-            1.f, -1.f, 0.f, 1.f, 0.f,
-            1.f,  1.f, 0.f, 1.f, 1.f,
-            -1.f,  1.f, 0.f, 0.f, 1.f,
-            1.f, -1.f, 0.f, 1.f, 0.f
+            -1.f,  1.f, 0.f,
+            0.f, 1.f,
+            -1.f, -1.f, 0.f,
+            0.f, 0.f,
+            1.f, -1.f, 0.f,
+            1.f, 0.f,
+            1.f,  1.f, 0.f,
+            1.f, 1.f,
+            -1.f,  1.f, 0.f,
+            0.f, 1.f,
+            1.f, -1.f, 0.f,
+            1.f, 0.f
         };
 
     glGenBuffers(1, &m_fullscreen_vbo);
@@ -131,44 +181,79 @@ void Realtime::initializeGL() {
     setUpScene();
 }
 
+
+
+
 void Realtime::paintGL() {
+    // glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+    // glViewport(0, 0, dims[0], dims[1]);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    // glm::vec4 topLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].top_left_tr1;
+    // glm::vec4 topRight = m_text->messages[m_text->messages.size() - 1].characters_quads[m_text->messages[m_text->messages.size() - 1].characters_quads.size() - 1].top_right_tr2;
+    // glm::vec4 bottomLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].bottom_left_tr1;
+
+    // int width = topRight.x - topLeft.x;
+    // int height = bottomLeft.y - topLeft.y;
+
+
+    glClearColor(1,0,0,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(m_shader);
+    glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+    m_text->draw_messages(m_text->messages.size() - 1);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
     glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
+    glUseProgram(0);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // if commented out, will display text bc we painttexture above. if not commented out, then clear screen before drawing city
 
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
-        switch (shape.primitive.type) {
-        case PrimitiveType::PRIMITIVE_SPHERE:
-            glBindVertexArray(m_vao_sphere);
-            break;
-        case PrimitiveType::PRIMITIVE_CUBE:
-            glBindVertexArray(m_vao_cube);
-            break;
-        case PrimitiveType::PRIMITIVE_CONE:
-            glBindVertexArray(m_vao_cone);
-            break;
-        case PrimitiveType::PRIMITIVE_CYLINDER:
-            glBindVertexArray(m_vao_cylinder);
-            break;
-        case PrimitiveType::PRIMITIVE_MESH:
-            break;
-        }
+        // switch (shape.primitive.type) {
+        // case PrimitiveType::PRIMITIVE_SPHERE:
+        //     glBindVertexArray(m_vao_sphere);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CUBE:
+        //     glBindVertexArray(m_vao_cube);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CONE:
+        //     glBindVertexArray(m_vao_cone);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CYLINDER:
+        //     glBindVertexArray(m_vao_cylinder);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_MESH:
+        //     break;
+        // }
 
         // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
         // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
         // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
 
 
+        glActiveTexture(GL_TEXTURE31);
+        // glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
+
         glm::vec4 cAmbient(1, 1, 1, 1);
         glm::vec4 cDiffuse(1, 1, 1, 1);
         glm::vec4 cSpecular(1, 1, 1, 1);
 
         glUseProgram(m_shader);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
+
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "text_model"), 1, GL_FALSE, &m_model[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
         glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
         glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
@@ -188,34 +273,30 @@ void Realtime::paintGL() {
         glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
         // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
-        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+        glUniform1i(glGetUniformLocation(m_shader, "isText"), false);
+        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(m_camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
 
-        switch (shape.primitive.type) {
-        case PrimitiveType::PRIMITIVE_SPHERE:
-            glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_CUBE:
-            glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_CONE:
-            glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_CYLINDER:
-            glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
-            break;
-        case PrimitiveType::PRIMITIVE_MESH:
-            break;
-        }
+        // switch (shape.primitive.type) {
+        // case PrimitiveType::PRIMITIVE_SPHERE:
+        //     glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CUBE:
+        //     glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CONE:
+        //     glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CYLINDER:
+        //     glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_MESH:
+        //     break;
+        // }
 
-        // glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
+        glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
         glBindVertexArray(0);
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-    glViewport(0, 0, m_screen_width, m_screen_height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
-    glUseProgram(0);
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -234,7 +315,7 @@ void Realtime::resizeGL(int w, int h) {
     makeFBO();
 
     float c = -settings.nearPlane / settings.farPlane;
-    float widthAngle = float(size().width()) / float(size().height()) * camera.getHeightAngle();
+    float widthAngle = float(size().width()) / float(size().height()) * m_camera.getHeightAngle();
     m_proj = glm::mat4(1.f, 0.f, 0.f, 0.f,
                        0.f, 1.f, 0.f, 0.f,
                        0.f, 0.f, -2.f, 0.f,
@@ -244,7 +325,7 @@ void Realtime::resizeGL(int w, int h) {
                        0.f, 0.f, 1.f / (1.f + c), -1,
                        0.f, 0.f, -c / (1.f + c), 0.f) *
              glm::mat4(1.f / (settings.farPlane * tan(widthAngle / 2.f)), 0.f, 0.f, 0.f,
-                       0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
+                       0.f, 1.f / (settings.farPlane * tan(m_camera.getHeightAngle() / 2.f)), 0.f, 0.f,
                        0.f, 0.f, 1.f / settings.farPlane, 0.f,
                        0.f, 0.f, 0.f, 1.f);
 }
@@ -262,9 +343,9 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 
     // Enable and define attribute 0 to store vertex positions
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(0));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void *>(0));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(GLfloat), reinterpret_cast<void*>(4 * sizeof(GLfloat)));
 
     // Clean-up bindings
     glBindVertexArray(0);
@@ -273,13 +354,9 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 
 void Realtime::setUpScene() {
     m_data = RenderData();
-    // bool success = SceneParser::parse(settings.sceneFilePath, m_data);
-    // if (!success) {
-    //     std::cerr << "Error loading scene" << std::endl;
-    // }
 
-    m_data.cameraData.pos = glm::vec4(3.f, 3.f, 3.f, 1.f);
-    m_data.cameraData.look = glm::vec4(-3.f, -3.f, -3.f, 0.f);
+    m_data.cameraData.pos = glm::vec4(0.f, 0.f, 15.f, 1.f);
+    m_data.cameraData.look = glm::vec4(0.f, 0.f, -15.f, 0.f);
     m_data.cameraData.up = glm::vec4(0, 1, 0, 0);
     m_data.cameraData.heightAngle = 30 * M_PI / 180.f;;
     m_data.globalData.ka = 0.5;
@@ -299,7 +376,7 @@ void Realtime::setUpScene() {
     generateCity();
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
-    camera = scene.getCamera();
+    m_camera = scene.getCamera();
 
     m_numLights = m_data.lights.size();
     for (int i = 0; i < m_numLights; i++) {
@@ -326,7 +403,7 @@ void Realtime::setUpScene() {
     }
 
     float c = -settings.nearPlane / settings.farPlane;
-    float widthAngle = float(size().width()) / float(size().height()) * camera.getHeightAngle();
+    float widthAngle = float(size().width()) / float(size().height()) * m_camera.getHeightAngle();
     m_proj = glm::mat4(1.f, 0.f, 0.f, 0.f,
                        0.f, 1.f, 0.f, 0.f,
                        0.f, 0.f, -2.f, 0.f,
@@ -336,26 +413,23 @@ void Realtime::setUpScene() {
                        0.f, 0.f, 1.f / (1.f + c), -1,
                        0.f, 0.f, -c / (1.f + c), 0.f) *
              glm::mat4(1.f / (settings.farPlane * tan(widthAngle / 2.f)), 0.f, 0.f, 0.f,
-                       0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
+                       0.f, 1.f / (settings.farPlane * tan(m_camera.getHeightAngle() / 2.f)), 0.f, 0.f,
                        0.f, 0.f, 1.f / settings.farPlane, 0.f,
                        0.f, 0.f, 0.f, 1.f);
-}
-
-void Realtime::sceneChanged() {
-    setUpScene();
-    update(); // asks for a PaintGL() call to occur
 }
 
 void Realtime::generateCity() {
     m_data.shapes.clear();
 
-    int gridSize = 25;
-    float gridUpperBoundary = gridSize / 10.f;
-    int streetDensityX = gridSize / (gridSize * (settings.streetDensityX / 100.f));
-    int streetDensityZ = gridSize / (gridSize * (settings.streetDensityZ / 100.f));
+    int gridSizeX = m_text->messages[m_text->messages.size() - 1].alphabet_texture_width / 10.f;
+    int gridSizeZ = m_text->messages[m_text->messages.size() - 1].alphabet_texture_height / 10.f;
+    float gridUpperBoundaryX = gridSizeX / 10.f;
+    float gridUpperBoundaryZ = gridSizeZ / 10.f;
+    int streetDensityX = gridSizeX / (gridSizeX * (settings.streetDensityX / 100.f));
+    int streetDensityZ = gridSizeZ / (gridSizeZ * (settings.streetDensityZ / 100.f));
 
-    for (int i = 0; i < gridSize; i++) {
-        for (int j = 0; j < gridSize; j++) {
+    for (int i = 0; i < gridSizeX; i++) {
+        for (int j = 0; j < gridSizeZ; j++) {
             if (i % streetDensityX != 0 && j % streetDensityZ != 0) {
                 ScenePrimitive primitive;
                 primitive.type = PrimitiveType::PRIMITIVE_CUBE;
@@ -364,6 +438,7 @@ void Realtime::generateCity() {
                 float r3 = (arc4random_uniform(settings.buildingHeight) + 0.1f) / 10.f;
 
                 glm::mat4 ctm = glm::translate(glm::mat4(1.0f), glm::vec3(i / 10.f, r2 / 4.f, j / 10.f));
+                ctm *= glm::translate(glm::mat4(1.0f), glm::vec3(gridSizeX / -20.f, 0, gridSizeZ / -20.f));
                 float dim1 = r3 / settings.buildingHeight;
                 float dim3 = r1 / settings.buildingHeight;
                 ctm *= glm::scale(glm::mat4(1.0f), glm::vec3(dim1 + ((0.1 - dim1) / 2), r2 / 2.f, dim3 + ((0.1 - dim3) / 2)));
@@ -383,8 +458,9 @@ void Realtime::generateCity() {
                     dim1 = i / 10.f + r1;
                     dim3 = j / 10.f + r3;
 
-                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundary && dim3 < gridUpperBoundary) {
+                    if ((int) (dim1 * 10.f) % streetDensityX != 0 && (int) (dim3 * 10.f) % streetDensityZ != 0 && dim1 < gridUpperBoundaryX && dim3 < gridUpperBoundaryZ) {
                         glm::mat4 ctm2 = glm::translate(glm::mat4(1.0f), glm::vec3(dim1, r2 / 6.f, dim3));
+                        ctm2 *= glm::translate(glm::mat4(1.0f), glm::vec3(gridSizeX / -20.f, 0, gridSizeZ / -20.f));
                         ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 3.f, r2 / 3.f, r3 / 3.f));
                         RenderShapeData shape2;
                         shape2.ctm = ctm2;
@@ -400,36 +476,16 @@ void Realtime::generateCity() {
 
 void Realtime::settingsChanged() {
     if (initFinish) {
-        sphere->clearData();
-        cube->clearData();
-        cone->clearData();
-        cylinder->clearData();
+        free(m_text);
+        m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
+        std::string typefaceFilepath = settings.typeface;
+        typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 120, false);
 
+        glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+        glViewport(0, 0, dims[0], dims[1]);
+        makeFBO();
         generateCity();
-
-        sphere->updateParams(settings.shapeParameter1, settings.shapeParameter2);
-        setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
-        cube->updateParams(settings.shapeParameter1);
-        setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
-        cone->updateParams(settings.shapeParameter1, settings.shapeParameter2);
-        setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
-        cylinder->updateParams(settings.shapeParameter1, settings.shapeParameter2);
-        setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
-
-        float c = -settings.nearPlane / settings.farPlane;
-        float widthAngle = float(size().width()) / float(size().height()) * camera.getHeightAngle();
-        m_proj = glm::mat4(1.f, 0.f, 0.f, 0.f,
-                           0.f, 1.f, 0.f, 0.f,
-                           0.f, 0.f, -2.f, 0.f,
-                           0.f, 0.f, -1.f, 1.f) *
-                 glm::mat4(1.f, 0.f, 0.f, 0.f,
-                           0.f, 1.f, 0.f, 0.f,
-                           0.f, 0.f, 1.f / (1.f + c), -1,
-                           0.f, 0.f, -c / (1.f + c), 0.f) *
-                 glm::mat4(1.f / (settings.farPlane * tan(widthAngle / 2.f)), 0.f, 0.f, 0.f,
-                           0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
-                           0.f, 0.f, 1.f / settings.farPlane, 0.f,
-                           0.f, 0.f, 0.f, 1.f);
     }
     update(); // asks for a PaintGL() call to occur
 }
@@ -439,15 +495,17 @@ void Realtime::settingsChanged() {
 void Realtime::makeFBO(){
     glGenTextures(1, &m_fbo_texture);
     glActiveTexture(GL_TEXTURE0);
+    glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
     glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fbo_width, m_fbo_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dims[0], dims[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenRenderbuffers(1, &m_fbo_renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_fbo_renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_fbo_width, m_fbo_height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, dims[0], dims[1]);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     glGenFramebuffers(1, &m_fbo);
@@ -461,10 +519,6 @@ void Realtime::makeFBO(){
 
 void Realtime::paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture){
     glUseProgram(m_texture_shader);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "togglePerPixelTexture"), togglePerPixelTexture);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "toggleKernelTexture"), toggleKernelTexture);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "fboWidth"), m_fbo_width);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "fboHeight"), m_fbo_height);
 
     glBindVertexArray(m_fullscreen_vao);
     glActiveTexture(GL_TEXTURE0);
@@ -474,24 +528,6 @@ void Realtime::paintTexture(GLuint texture, bool togglePerPixelTexture, bool tog
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glUseProgram(0);
-}
-
-glm::mat4 rotate(const glm::mat4& mat, float angle, const glm::vec3& axis) {
-    glm::vec3 normalizedAxis = glm::normalize(axis);
-    float cosAngle = cos(angle);
-    float sinAngle = sin(angle);
-    float x = normalizedAxis.x;
-    float y = normalizedAxis.y;
-    float z = normalizedAxis.z;
-
-    glm::mat4 rotationMatrix = glm::mat4(
-        cosAngle + x * x * (1 - cosAngle), x * y * (1 - cosAngle) - z * sinAngle, x * z * (1 - cosAngle) + y * sinAngle, 0.f,
-        y * x * (1 - cosAngle) + z * sinAngle, cosAngle + y * y * (1 - cosAngle), y * z * (1 - cosAngle) - x * sinAngle, 0.f,
-        z * x * (1 - cosAngle) - y * sinAngle, z * y * (1 - cosAngle) + x * sinAngle, cosAngle + z * z * (1 - cosAngle), 0.f,
-        0.f, 0.f, 0.f, 1.f
-        );
-
-    return mat * rotationMatrix;
 }
 
 void Realtime::keyPressEvent(QKeyEvent *event) {
@@ -523,27 +559,11 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
         int deltaY = posY - m_prev_mouse_pos.y;
         m_prev_mouse_pos = glm::vec2(posX, posY);
 
-        float xChange = deltaX * 0.2f;
-        float yChange = deltaY * 0.2f;
+        float xChange = deltaX * 0.01f;
+        float yChange = deltaY * -0.01f;
 
-        glm::vec3 look = glm::vec3(m_data.cameraData.look);
-        glm::mat4 cameraMatrix = glm::mat4(1.0f);
-        cameraMatrix = rotate(cameraMatrix, glm::radians(xChange), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
-        glm::vec3 up = glm::vec3(m_data.cameraData.up);
-        up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
-
-        glm::vec3 rightDirection = glm::normalize(glm::cross(look, up));
-        cameraMatrix = rotate(glm::mat4(1.0f), glm::radians(yChange), rightDirection);
-        look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
-        up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
-
-        m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
-        m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
-
-        RealtimeScene scene{ size().width(), size().height(), m_data };
-        camera = scene.getCamera();
+        m_model = rotate(m_model, xChange, glm::vec3(0.0f, 0.f, 1.0f));
+        m_model = rotate(m_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
 
         update(); // asks for a PaintGL() call to occur
     }
@@ -577,7 +597,7 @@ void Realtime::timerEvent(QTimerEvent *event) {
     m_data.cameraData.pos += glm::vec4(move * 5.f * deltaTime, 0.f);
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
-    camera = scene.getCamera();
+    m_camera = scene.getCamera();
 
     update(); // asks for a PaintGL() call to occur
 }
@@ -645,3 +665,4 @@ void Realtime::saveViewportImage(std::string filePath) {
     glDeleteRenderbuffers(1, &rbo);
     glDeleteFramebuffers(1, &fbo);
 }
+

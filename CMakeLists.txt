@@ -19,6 +19,8 @@ find_package(Qt6 REQUIRED COMPONENTS Gui)
 find_package(Qt6 REQUIRED COMPONENTS OpenGL)
 find_package(Qt6 REQUIRED COMPONENTS OpenGLWidgets)
 find_package(Qt6 REQUIRED COMPONENTS Xml)
+find_package(Freetype)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Allows you to include files from within those directories, without prefixing their filepaths
 include_directories(src)
@@ -53,14 +55,18 @@ add_executable(${PROJECT_NAME}
     src/shapes/cylinder.h
     src/camera.h
     src/realtimescene.h
+    src/text_fonts_glyphs.h
+
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`
 add_subdirectory(glm)
+add_subdirectory(freetype)
 
 # GLEW: this creates its library and allows you to `#include "GL/glew.h"`
 add_library(StaticGLEW STATIC glew/src/glew.c)
 include_directories(${PROJECT_NAME} PRIVATE glew/include)
+include_directories(/usr/include/freetype2  -I/usr/local/include/freetype2  -I/usr/include/libpng16)
 
 # Specifies libraries to be linked (Qt components, glew, etc)
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -70,6 +76,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt::OpenGLWidgets
     Qt::Xml
     StaticGLEW
+    freetype
 )
 
 # Specifies other files
@@ -81,6 +88,11 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/shaders/default.vert
         resources/shaders/texture.vert
         resources/shaders/texture.frag
+        resources/typefaces/RubikMonoOne.ttf
+        resources/typefaces/Karla.ttf
+        resources/typefaces/Jacquard24.ttf
+        resources/typefaces/InstrumentSerif.ttf
+        resources/typefaces/FKGroteskSemiMono.ttf
 )
 
 # GLEW: this provides support for Windows (including 64-bit)
