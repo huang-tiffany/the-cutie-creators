@@ -6,6 +6,7 @@
 #endif
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glut/glut.h>
 
 #include <unordered_map>
 #include <QElapsedTimer>
@@ -18,6 +19,9 @@
 #include "shapes/cube.h"
 #include "shapes/cone.h"
 #include "shapes/cylinder.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include "text_fonts_glyphs.h"
 
 class Realtime : public QOpenGLWidget
 {
@@ -26,7 +30,6 @@ public:
     void finish();                                      // Called on program exit
     void setUpScene();
     void setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<float> shapeData);
-    void sceneChanged();
     void settingsChanged();
     void saveViewportImage(std::string filePath);
 
@@ -65,7 +68,7 @@ private:
     bool initFinish = false;
 
     RenderData m_data;
-    Camera camera;
+    Camera m_camera;
 
     GLuint m_shader; // Stores id of shader program
     GLuint m_vbo_sphere;
@@ -110,8 +113,8 @@ private:
     GLuint m_fbo_texture;
     GLuint m_fbo_renderbuffer;
 
-    // GLuint m_worleyPointsBuffer;
-    // GLuint m_worleyPointsTexture;
+    FT_Library m_free_type;
+    Text* m_text;
 
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 

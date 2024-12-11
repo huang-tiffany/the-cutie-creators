@@ -1,4 +1,4 @@
-#include "Cube.h"
+#include "cube.h"
 
 void Cube::updateParams(int param1) {
     m_vertexData = std::vector<float>();
@@ -11,17 +11,23 @@ void Cube::makeTile(glm::vec3 topLeft,
                     glm::vec3 bottomLeft,
                     glm::vec3 bottomRight) {
     insertVec3(m_vertexData, topLeft);
+    m_vertexData.push_back(1);
     insertVec3(m_vertexData, glm::normalize(glm::cross(topLeft - bottomLeft, topLeft - bottomRight)));
     insertVec3(m_vertexData, bottomLeft);
+    m_vertexData.push_back(1);
     insertVec3(m_vertexData, glm::normalize(glm::cross(bottomLeft - bottomRight, bottomLeft - topLeft)));
     insertVec3(m_vertexData, bottomRight);
+    m_vertexData.push_back(1);
     insertVec3(m_vertexData, glm::normalize(glm::cross(bottomRight - topLeft, bottomRight - bottomLeft)));
 
     insertVec3(m_vertexData, topRight);
+    m_vertexData.push_back(1);
     insertVec3(m_vertexData, glm::normalize(glm::cross(topRight - topLeft, topRight - bottomRight)));
     insertVec3(m_vertexData, topLeft);
+    m_vertexData.push_back(1);
     insertVec3(m_vertexData, glm::normalize(glm::cross(topLeft - bottomRight, topLeft - topRight)));
     insertVec3(m_vertexData, bottomRight);
+    m_vertexData.push_back(1);
     insertVec3(m_vertexData, glm::normalize(glm::cross(bottomRight - topRight, bottomRight - topLeft)));
 }
 

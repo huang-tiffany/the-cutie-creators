@@ -5,10 +5,12 @@
 
 struct Settings {
     std::string sceneFilePath;
-    int shapeParameter1 = 1;
-    int shapeParameter2 = 1;
-    float nearPlane = 1;
-    float farPlane = 1;
+    int shapeParameter1 = 5;
+    int shapeParameter2 = 5;
+    float nearPlane = 0.1;
+    float farPlane = 100;
+    std::string text;
+    std::string typeface;
     bool perPixelFilter = false;
     bool kernelBasedFilter = false;
 

@@ -2,9 +2,9 @@
 
 in vec3 worldPosition;
 in vec3 worldNormal;
-// in vec3 points[1000];
-// uniform sampler2D pointTexture;
-uniform int numPoints;
+in vec2 texture_coordinates;
+in vec3 texcoords_anim;
+
 out vec4 fragColor;
 uniform float ka;
 uniform float kd;
@@ -24,187 +24,87 @@ uniform float penumbra[8];
 uniform int numLights;
 uniform float shininess;
 uniform vec4 cameraPos;
-// uniform vec2 screenSize;
 
-// const vec3 offsets[27] = vec3[](
-//     vec3(0, 0, 0),
-//     vec3(0, 0, 1),
-//     vec3(-1, 1, 1),
-//     vec3(-1, 0, 1),
-//     vec3(-1, -1, 1),
-//     vec3(0, 1, 1),
-//     vec3(0, -1, 1),
-//     vec3(1, 1, 1),
-//     vec3(1, 0, 1),
-//     vec3(1, -1, 1),
-//     vec3(0, 0, -1),
-//     vec3(-1, 1, -1),
-//     vec3(-1, 0, -1),
-//     vec3(-1, -1, -1),
-//     vec3(0, 1, -1),
-//     vec3(0, -1, -1),
-//     vec3(1, 1, -1),
-//     vec3(1, 0, -1),
-//     vec3(1, -1, -1),
-//     vec3(-1, 1, 0),
-//     vec3(-1, 0, 0),
-//     vec3(-1, -1, 0),
-//     vec3(0, 1, 0),
-//     vec3(0, -1, 0),
-//     vec3(1, 1, 0),
-//     vec3(1, 0, 0),
-//     vec3(1, -1, 0)
-// );
-
-// float maxComponent(vec3 vec) {
-//     return max(vec.x, max(vec.y, vec.z));
-// }
-
-// float minComponent(vec3 vec) {
-//     return min(vec.x, min(vec.y, vec.z));
-// }
-
-// vec3 getPointFromTexture(int index) {
-//     return texelFetch(pointTexture, ivec2(index, 0), 0).xyz;
-// }
-
-// float worley(vec3 samplePos) {
-//     int numCells = 10;
-//     vec3 cellID = floor(samplePos * numCells);
-//     float minSqrDst = 1;
-
-//     for (int cellOffsetIndex = 0; cellOffsetIndex < 27; cellOffsetIndex++) {
-//         vec3 adjID = cellID + offsets[cellOffsetIndex];
-//         if (minComponent(adjID) == -1 || maxComponent(adjID) == numCells) {
-//             vec3 wrappedID = mod(adjID + numCells, float(numCells));
-//             int adjCellIndex = int(wrappedID[0]) + numCells * (int(wrappedID[1]) + int(wrappedID[2]) * numCells);
-//             vec3 wrappedPoint = getPointFromTexture(adjCellIndex);
-//             for (int wrapOffsetIndex = 0; wrapOffsetIndex < 27; wrapOffsetIndex ++) {
-//                 vec3 sampleOffset = (samplePos - (wrappedPoint + offsets[wrapOffsetIndex]));
-//                 minSqrDst = min(minSqrDst, dot(sampleOffset, sampleOffset));
-//             }
-//         } else {
-//             int adjCellIndex = int(adjID[0]) + numCells * (int(adjID[1]) + int(adjID[2]) * numCells);
-//             vec3 sampleOffset = samplePos - getPointFromTexture(adjCellIndex);
-//             minSqrDst = min(minSqrDst, dot(sampleOffset, sampleOffset));
-//         }
-//     }
-//     return sqrt(minSqrDst);
-// }
-
-float basicFog() {
-    vec3 cameraProj = vec3(cameraPos);
-    cameraProj.y = 0.0;
-
-    vec3 pixelProj = worldPosition;
-    pixelProj.y = 0.0;
-
-    float fogEnd = 100.0;
-    float deltaD = length(cameraProj - pixelProj) / fogEnd;
-
-    float deltaY = 0.0f;
-    float density = 0.0f;
-
-    float fogTop = 10.0;
-    float fogStart = 0.1;
-    float fogEndHeight = -0.4;
-
-    float heightFactor = 0.0;
-    heightFactor = clamp(smoothstep(fogStart, fogEndHeight, worldPosition.y), 0.0, 1.0);
-
-    if (cameraPos.y > fogTop) {
-        if (worldPosition.y < fogTop) {
-            deltaY = (fogTop - worldPosition.y) / fogTop;
-            density = deltaY * deltaY * 0.5 * heightFactor;
-        }
-    } else {
-        if (worldPosition.y < fogTop) {
-            deltaY = abs(cameraPos.y - worldPosition.y) / fogTop;
-            float deltaCamera = (fogTop - cameraPos.y) / fogTop;
-            float densityCamera = deltaCamera * deltaCamera * 0.5;
-            float deltaPixel = (fogTop - worldPosition.y) / fogTop;
-            float densityPixel = deltaPixel * deltaPixel * 0.5;
-            density = abs(densityCamera - densityPixel) * heightFactor;
-        } else {
-            deltaY = (fogTop - cameraPos.y) / fogTop;
-            density = deltaY * deltaY * 0.5 * heightFactor;
-        }
-    }
-
-    float fogDensity = 0.0;
-
-    if (deltaY != 0) {
-        fogDensity = (sqrt(1.0 + ((deltaD / deltaY) * (deltaD / deltaY)))) * density;
-    }
-
-    return exp(-fogDensity);
-}
+uniform vec3 font_colour;
+uniform sampler2D alphabet_texture;
+uniform bool isText;
 
 void main() {
-    // vec3 newWorldPos = worldPosition;
-    // newWorldPos[1] = 0;
+    float texture_value = texture(alphabet_texture, texture_coordinates).r;
 
-    // if (newWorldPos[0] > 0.5 && newWorldPos[0] < 0.75) {
-    fragColor = ka * cAmbient;
-    for (int i = 0; i < numLights; ++i) {
-        float att = 1.f;
-        vec3 currLightDir = normalize(vec3(lightPos[i]) - worldPosition);
-        vec4 lightIntensity = lightColors[i];
-        float dist = length(vec3(lightPos[i]) - worldPosition);
-        if (lightType[i] == 0) {
-            currLightDir = -normalize(vec3(lightDir[i]));
-        } else if (lightType[i] == 1) {
-            att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-        } else if (lightType[i] == 2) {
-            att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-            float x = acos(dot(-currLightDir, normalize(vec3(lightDir[i]))));
-            float innerAngle = angle[i] - penumbra[i];
-            float falloff = -2.f * pow((x - innerAngle) / (angle[i] - innerAngle), 3.f) + 3.f * pow((x - innerAngle) / (angle[i] - innerAngle), 2.f);
-            if (x <= innerAngle) {
-                lightIntensity = lightColors[i];
-            } else if (x > innerAngle && x <= angle[i]) {
-                lightIntensity *= (1.f - falloff);
-            } else {
-                lightIntensity = vec4(0, 0, 0, 1);
+    if (!isText) {
+        if (texture_value != 0) {
+            fragColor = ka * cAmbient;
+            for (int i = 0; i < numLights; ++i) {
+                float att = 1.f;
+                vec3 currLightDir = normalize(vec3(lightPos[i]) - worldPosition);
+                vec4 lightIntensity = lightColors[i];
+                float dist = length(vec3(lightPos[i]) - worldPosition);
+                if (lightType[i] == 0) {
+                    currLightDir = -normalize(vec3(lightDir[i]));
+                } else if (lightType[i] == 1) {
+                    att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
+                } else if (lightType[i] == 2) {
+                    att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
+                    float x = acos(dot(-currLightDir, normalize(vec3(lightDir[i]))));
+                    float innerAngle = angle[i] - penumbra[i];
+                    float falloff = -2.f * pow((x - innerAngle) / (angle[i] - innerAngle), 3.f) + 3.f * pow((x - innerAngle) / (angle[i] - innerAngle), 2.f);
+                    if (x <= innerAngle) {
+                        lightIntensity = lightColors[i];
+                    } else if (x > innerAngle && x <= angle[i]) {
+                        lightIntensity *= (1.f - falloff);
+                    } else {
+                        lightIntensity = vec4(0, 0, 0, 1);
+                    }
+                }
+                float nl = clamp(dot(normalize(worldNormal), currLightDir), 0.0, 1.0);
+                float diffuse = kd * nl;
+                fragColor += att * diffuse * lightIntensity * cDiffuse;
+                vec3 r = normalize(reflect(-currLightDir, normalize(worldNormal)));
+                vec3 v = normalize(vec3(cameraPos) - worldPosition);
+                float rv = clamp(dot(r, v), 0.0, 1.0);
+                float specular;
+                if (shininess <= 0.0) {
+                    specular = 0.0;
+                } else {
+                    specular = ks * pow(rv, shininess);
+                }
+                fragColor += att * specular * lightColors[i] * cSpecular;
             }
-        }
-        float nl = clamp(dot(normalize(worldNormal), currLightDir), 0.0, 1.0);
-        float diffuse = kd * nl;
-        fragColor += att * diffuse * lightIntensity * cDiffuse;
-        vec3 r = normalize(reflect(-currLightDir, normalize(worldNormal)));
-        vec3 v = normalize(vec3(cameraPos) - worldPosition);
-        float rv = clamp(dot(r, v), 0.0, 1.0);
-        float specular;
-        if (shininess <= 0.0) {
-            specular = 0.0;
+            fragColor.a = 1.0;
         } else {
-            specular = ks * pow(rv, shininess);
+            fragColor = vec4(0, 0, 0, 1);
         }
-        fragColor += att * specular * lightColors[i] * cSpecular;
-    }
-    fragColor.a = 1.0;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    // } else {
-    //     fragColor = vec4(0, 0, 0, 1);
-=======
-=======
->>>>>>> d2fcf45a45efd2525f3af34d7585ac6dfcedcbd5
 
-    if (worldPosition.y < 0.1) {
-        float fog = basicFog();
-        vec3 fogColor = vec3(0.62, 0.68, 0.75);
-        fragColor = mix(vec4(fogColor, 1.0), fragColor, fog);
-    }
+    } else {
+        // discard;
 
-    // if (worldPosition.y < 0.01) {
-    //     vec2 fragUV = gl_FragCoord.xy / screenSize;
-    //     vec3 samplePos = vec3(fragUV, 0.0);
-    //     float noiseValue = worley(samplePos);
-    //     fragColor = vec4(vec3(noiseValue), 1.0);
-<<<<<<< HEAD
->>>>>>> d2fcf45 (basic fog)
-=======
->>>>>>> d2fcf45a45efd2525f3af34d7585ac6dfcedcbd5
-    // }
+    // Enable this if-statement for 2D window-positioned text
+    // -------------------------------------------------------------------------
+     // if (texture_value == 1) // Fully opaque character pixels.
+     // {
+     //         fragment_colour = vec4(font_colour / 255, texture_value);
+     //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
+     // }
+     // else if (texture_value == 0) // Fully transparent, i.e. background pixels (Note: you cannot use the "discard" method as used for 3D text further down, if colouring in the font's background)
+     // {
+     //         fragment_colour = vec4(font_colour / 255, texture_value);
+     //                 // fragment_colour = vec4(85.0 / 255, 160.0 / 255, 155.0 / 255, 1.0);
+     // }
+     // else // Anti-aliased character pixels.
+     // {
+     //         fragment_colour = vec4(font_colour / 255, texture_value);
+     //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
+     // }
+
+    fragColor = vec4(texture_value, texture_value, 1, 1);
+
+    // Enable these three lines instead for 3D animated text
+    // ----------------------------------------------------------------------
+    // fragment_colour = vec4((texcoords_anim * 2) + vec3(0.25, 0.25, 0.25), texture_value);
+
+    // if (texture_value == 0)
+            //  discard;
+
+    }
 }
