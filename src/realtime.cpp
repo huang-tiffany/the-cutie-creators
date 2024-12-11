@@ -40,10 +40,12 @@ void Realtime::finish() {
     glDeleteBuffers(1, &m_vbo_cube);
     glDeleteBuffers(1, &m_vbo_cone);
     glDeleteBuffers(1, &m_vbo_cylinder);
+    glDeleteBuffers(1, &m_vbo_fog);
     glDeleteBuffers(1, &m_vao_sphere);
     glDeleteBuffers(1, &m_vao_cube);
     glDeleteBuffers(1, &m_vao_cone);
     glDeleteBuffers(1, &m_vao_cylinder);
+    glDeleteBuffers(1, &m_vao_fog);
     glDeleteProgram(m_shader);
     this->doneCurrent();
 
@@ -120,6 +122,7 @@ void Realtime::initializeGL() {
     setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
     setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
     setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
+    setUpShapeData(m_vbo_fog, m_vao_fog, fog.generateFog());
 
     m_model = rotate(m_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
 
@@ -177,8 +180,6 @@ void Realtime::initializeGL() {
 
     makeFBO();
 
-    // m_worleyPointsTexture = createWorleyPointsBuffer(10, "WorleyPointsBuffer");
-
     initFinish = true;
 
     setUpScene();
@@ -216,21 +217,6 @@ void Realtime::paintGL() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // if commented out, will display text bc we painttexture above. if not commented out, then clear screen before drawing city
-
-    // glBindBuffer(GL_ARRAY_BUFFER, m_worleyPointsBuffer);
-    // GLuint pointLocation = glGetAttribLocation(m_shader, "worleyPoints");
-    // glVertexAttribPointer(pointLocation, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-    // glEnableVertexAttribArray(pointLocation);
-    // glDrawArrays(GL_POINTS, 0, 10 * 10 * 10);
-
-    // glActiveTexture(GL_TEXTURE0);  // Activate texture unit 0
-    // glBindTexture(GL_TEXTURE_2D, m_worleyPointsTexture); // Bind the texture
-
-    // // Pass the texture to the shader (uniform sampler2D)
-    // glUseProgram(m_shader);
-    // glm::vec2 screenSize = glm::vec2(m_screen_width, m_screen_height);
-    // glUniform2fv(glGetUniformLocation(m_shader, "screenSize"), 1, &screenSize[0]);
-    // glUniform1i(glGetUniformLocation(m_shader, "pointTexture"), 0);
 
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
@@ -293,6 +279,7 @@ void Realtime::paintGL() {
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
         glUniform1i(glGetUniformLocation(m_shader, "isText"), false);
         glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(m_camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+        glUniform1i(glGetUniformLocation(m_shader, "isFog"), 0);
 
         // switch (shape.primitive.type) {
         // case PrimitiveType::PRIMITIVE_SPHERE:
@@ -315,6 +302,14 @@ void Realtime::paintGL() {
 
         glBindVertexArray(0);
     }
+
+    glBindVertexArray(m_vao_fog);
+    glUseProgram(m_shader);
+    glUniform1i(glGetUniformLocation(m_shader, "isFog"), 1);
+    int res = fog.getResolution();
+    glPolygonMode(GL_FRONT_AND_BACK, fog.m_wireshade? GL_LINE : GL_FILL);
+    glDrawArrays(GL_TRIANGLES, 0, res * res * 6);
+    glBindVertexArray(0);
 }
 
 void Realtime::resizeGL(int w, int h) {

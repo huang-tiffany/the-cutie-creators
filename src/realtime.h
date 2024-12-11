@@ -22,6 +22,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "text_fonts_glyphs.h"
+#include "shapes/fog.h"
 
 class Realtime : public QOpenGLWidget
 {
@@ -75,16 +76,19 @@ private:
     GLuint m_vbo_cube;
     GLuint m_vbo_cone;
     GLuint m_vbo_cylinder;
+    GLuint m_vbo_fog;
     GLuint m_vao_sphere;
     GLuint m_vao_cube;
     GLuint m_vao_cone;
     GLuint m_vao_cylinder;
+    GLuint m_vao_fog;
     std::vector<std::vector<float>> m_shapesData;
 
     Sphere* sphere = new Sphere();
     Cube* cube = new Cube();
     Cone* cone = new Cone();
     Cylinder* cylinder = new Cylinder();
+    Fog fog;
 
     glm::mat4 m_model = glm::mat4(1);
     glm::mat4 m_view  = glm::mat4(1);
