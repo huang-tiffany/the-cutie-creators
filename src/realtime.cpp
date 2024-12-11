@@ -110,10 +110,10 @@ void Realtime::initializeGL() {
         int keep_console_open;
         std::cin >> keep_console_open;
     }
-    m_text = new Text(m_free_type, size().width(), size().height(), "aasdf"); // Declare a new text object, passing in your chosen alphabet.
-    m_text->create_text_message("a", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false); // True indicates that the message will be modified.
+    m_text = new Text(m_free_type, size().width(), size().height(), "gasdf"); // Declare a new text object, passing in your chosen alphabet.
+    m_text->create_text_message("a", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/Jacquard24-Regular.ttf", 130, false); // True indicates that the message will be modified.
 
-    m_text->create_text_message("aff", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
+    m_text->create_text_message("aff", 150, 100, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/Jacquard24-Regular.ttf", 130, false);
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -239,7 +239,7 @@ void Realtime::paintGL() {
         unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
         glUniform3fv(font_colour_loc, 1, &RGB[0]);
 
-        m_text->draw_messages();
+        // m_text->draw_messages();
         m_text->draw_alphabets();
 
         // glBindVertexArray(0);

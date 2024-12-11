@@ -87,7 +87,7 @@ void main(void)
          }
          else if (texture_value == 0) // Fully transparent, i.e. background pixels (Note: you cannot use the "discard" method as used for 3D text further down, if colouring in the font's background)
          {
-                 fragment_colour = vec4(font_colour / 255, texture_value);
+                 fragment_colour = vec4(1, 0, 0, 1);
                          // fragment_colour = vec4(85.0 / 255, 160.0 / 255, 155.0 / 255, 1.0);
          }
          else // Anti-aliased character pixels.

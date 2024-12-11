@@ -388,14 +388,13 @@ private:
             new_message.alphabet_texture_width = (curr_row_width > max_row_width) ? curr_row_width : max_row_width;
             // std::cout << "\n\n   alphabet_texture_width: " << alphabet_texture_width;
         }
-        new_message.alphabet_texture_height = number_of_rows * (new_message.tallest_font_height + alphabet_padding * 2);
+        new_message.alphabet_texture_height = number_of_rows * (new_message.tallest_font_height + alphabet_padding * 2) * 2;
 
         std::cout << "\n\n   alphabet_texture_width: " << new_message.alphabet_texture_width
                   << " --- alphabet_texture_height: " << new_message.alphabet_texture_height << "\n";
     }
 
-    void format_alphabet_texture_image(Message_Parent& new_message)
-    {
+    void format_alphabet_texture_image(Message_Parent& new_message) {
         glActiveTexture(GL_TEXTURE31);
         glBindTexture(GL_TEXTURE_2D, new_message.alphabet_texture);
 
@@ -414,23 +413,34 @@ private:
 
         new_message.relative_distance = new_message.tallest_font_height; // Set relative distance to initial value.
 
+        for (unsigned i = 0; i < alphabet_string.size(); ++i) {
+            if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
+                new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top;
+        }
+
         for (unsigned i = 0; i < alphabet_string.size(); ++i)
         {
             FT_Load_Char(face, alphabet_string[i], FT_LOAD_RENDER); // "glyph" as used below... is shorthand for "face->glyph"
 
+
+
             int tex_coord_left = increment_x - alphabet_padding;
-            glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, increment_y, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
             int tex_coord_right = increment_x + glyph->bitmap.width + alphabet_padding;
 
             int tex_coord_bottom = increment_y - alphabet_padding;
             int tex_coord_top = increment_y + glyph->bitmap.rows + alphabet_padding;
 
+            float bottom_bearing = ((int)glyph->bitmap.rows - (int)glyph->bitmap_top) * scale_pixels_y_to_OpenGL;
+            float height_plus_padding = (tex_coord_top - tex_coord_bottom) * scale_pixels_y_to_OpenGL;
+
+            glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, new_message.alphabet_texture_height * (2.f / 3.f) - glyph->bitmap_top, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
+
             increment_x += glyph->bitmap.width + (alphabet_padding * 2);
 
             // By default the characters are bottom aligned (Note: bitmap_top = the "Remaining Distance" above that bottom alignment, after having been moved downwards by "bottom_bearing" to produce character-origin alignment)
             // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
-                new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top; // Record the smallest... Tallest Font - "Remaining Distance" (incidentally, the tallest font is also checked against itself by doing this)
+            // if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
+            //     new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top; // Record the smallest... Tallest Font - "Remaining Distance" (incidentally, the tallest font is also checked against itself by doing this)
 
             // FT_GlyphSlotRec: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyphslotrec (Also available: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyph_metrics)
             // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
