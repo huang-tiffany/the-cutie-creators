@@ -82,6 +82,7 @@ private:
     std::vector<std::vector<float>> m_shapesData;
 
     Cube* cube = new Cube();
+    Fog fog;
 
     glm::mat4 m_mvp = glm::mat4(1);
     glm::mat4 m_text_model = glm::mat4(1);

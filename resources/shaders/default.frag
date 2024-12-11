@@ -27,8 +27,7 @@ uniform vec4 cameraPos;
 
 uniform vec3 font_colour;
 uniform sampler2D alphabet_texture;
-<<<<<<< HEAD
-uniform bool isText;
+// uniform bool isText;
 uniform bool isFog;
 
 float basicFog() {
@@ -76,195 +75,61 @@ float basicFog() {
 
     return exp(-fogDensity);
 }
-=======
-// uniform bool isText;
->>>>>>> main
 
 void main() {
     float texture_value = texture(alphabet_texture, texture_coordinates).r;
 
-<<<<<<< HEAD
-    if (!isText) {
-        if (texture_value != 0) {
-            if (!isFog) {
-                fragColor = ka * cAmbient;
-                for (int i = 0; i < numLights; ++i) {
-                    float att = 1.f;
-                    vec3 currLightDir = normalize(vec3(lightPos[i]) - worldPosition);
-                    vec4 lightIntensity = lightColors[i];
-                    float dist = length(vec3(lightPos[i]) - worldPosition);
-                    if (lightType[i] == 0) {
-                        currLightDir = -normalize(vec3(lightDir[i]));
-                    } else if (lightType[i] == 1) {
-                        att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-                    } else if (lightType[i] == 2) {
-                        att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-                        float x = acos(dot(-currLightDir, normalize(vec3(lightDir[i]))));
-                        float innerAngle = angle[i] - penumbra[i];
-                        float falloff = -2.f * pow((x - innerAngle) / (angle[i] - innerAngle), 3.f) + 3.f * pow((x - innerAngle) / (angle[i] - innerAngle), 2.f);
-                        if (x <= innerAngle) {
-                            lightIntensity = lightColors[i];
-                        } else if (x > innerAngle && x <= angle[i]) {
-                            lightIntensity *= (1.f - falloff);
-                        } else {
-                            lightIntensity = vec4(0, 0, 0, 1);
-                        }
-                    }
-                    float nl = clamp(dot(normalize(worldNormal), currLightDir), 0.0, 1.0);
-                    float diffuse = kd * nl;
-                    fragColor += att * diffuse * lightIntensity * cDiffuse;
-                    vec3 r = normalize(reflect(-currLightDir, normalize(worldNormal)));
-                    vec3 v = normalize(vec3(cameraPos) - worldPosition);
-                    float rv = clamp(dot(r, v), 0.0, 1.0);
-                    float specular;
-                    if (shininess <= 0.0) {
-                        specular = 0.0;
-                    } else {
-                        specular = ks * pow(rv, shininess);
-                    }
-                    fragColor += att * specular * lightColors[i] * cSpecular;
-                }
-                fragColor.a = 1.0;
-            } else {
-                float fog = basicFog();
-                fragColor = vec4(0.41, 0.45, 0.5, 1.0);
-                vec3 fogColor = vec3(0.53, 0.58, 0.64);
-                fragColor = mix(fragColor, vec4(fogColor, 1.0), fog);
-                fragColor.a = mix(0.1, 1.0, fog);;
-            }
-        } else {
-            fragColor = vec4(0, 0, 0, 1);
-=======
     // if (!isText) {
     if (texture_value != 0) {
-        fragColor = ka * cAmbient;
-        for (int i = 0; i < numLights; ++i) {
-            float att = 1.f;
-            vec3 currLightDir = normalize(vec3(lightPos[i]) - worldPosition);
-            vec4 lightIntensity = lightColors[i];
-            float dist = length(vec3(lightPos[i]) - worldPosition);
-            if (lightType[i] == 0) {
-                currLightDir = -normalize(vec3(lightDir[i]));
-            } else if (lightType[i] == 1) {
-                att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-            } else if (lightType[i] == 2) {
-                att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-                float x = acos(dot(-currLightDir, normalize(vec3(lightDir[i]))));
-                float innerAngle = angle[i] - penumbra[i];
-                float falloff = -2.f * pow((x - innerAngle) / (angle[i] - innerAngle), 3.f) + 3.f * pow((x - innerAngle) / (angle[i] - innerAngle), 2.f);
-                if (x <= innerAngle) {
-                    lightIntensity = lightColors[i];
-                } else if (x > innerAngle && x <= angle[i]) {
-                    lightIntensity *= (1.f - falloff);
-                } else {
-                    lightIntensity = vec4(0, 0, 0, 1);
+        if (!isFog) {
+            fragColor = ka * cAmbient;
+            for (int i = 0; i < numLights; ++i) {
+                float att = 1.f;
+                vec3 currLightDir = normalize(vec3(lightPos[i]) - worldPosition);
+                vec4 lightIntensity = lightColors[i];
+                float dist = length(vec3(lightPos[i]) - worldPosition);
+                if (lightType[i] == 0) {
+                    currLightDir = -normalize(vec3(lightDir[i]));
+                } else if (lightType[i] == 1) {
+                    att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
+                } else if (lightType[i] == 2) {
+                    att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
+                    float x = acos(dot(-currLightDir, normalize(vec3(lightDir[i]))));
+                    float innerAngle = angle[i] - penumbra[i];
+                    float falloff = -2.f * pow((x - innerAngle) / (angle[i] - innerAngle), 3.f) + 3.f * pow((x - innerAngle) / (angle[i] - innerAngle), 2.f);
+                    if (x <= innerAngle) {
+                        lightIntensity = lightColors[i];
+                    } else if (x > innerAngle && x <= angle[i]) {
+                        lightIntensity *= (1.f - falloff);
+                    } else {
+                        lightIntensity = vec4(0, 0, 0, 1);
+                    }
                 }
-            }
-            float nl = clamp(dot(normalize(worldNormal), currLightDir), 0.0, 1.0);
-            float diffuse = kd * nl;
-            fragColor += att * diffuse * lightIntensity * cDiffuse;
-            vec3 r = normalize(reflect(-currLightDir, normalize(worldNormal)));
-            vec3 v = normalize(vec3(cameraPos) - worldPosition);
-            float rv = clamp(dot(r, v), 0.0, 1.0);
-            float specular;
-            if (shininess <= 0.0) {
-                specular = 0.0;
-            } else {
-                specular = ks * pow(rv, shininess);
-            }
-            fragColor += att * specular * lightColors[i] * cSpecular;
->>>>>>> main
+                float nl = clamp(dot(normalize(worldNormal), currLightDir), 0.0, 1.0);
+                float diffuse = kd * nl;
+                fragColor += att * diffuse * lightIntensity * cDiffuse;
+                vec3 r = normalize(reflect(-currLightDir, normalize(worldNormal)));
+                vec3 v = normalize(vec3(cameraPos) - worldPosition);
+                float rv = clamp(dot(r, v), 0.0, 1.0);
+                float specular;
+                if (shininess <= 0.0) {
+                    specular = 0.0;
+                } else {
+                    specular = ks * pow(rv, shininess);
+                }
+                fragColor += att * specular * lightColors[i] * cSpecular;
+                }
+            fragColor.a = 1.0;
+        } else {
+            float fog = basicFog();
+            fragColor = vec4(0.41, 0.45, 0.5, 1.0);
+            vec3 fogColor = vec3(0.53, 0.58, 0.64);
+            fragColor = mix(fragColor, vec4(fogColor, 1.0), fog);
+            fragColor.a = mix(0.1, 1.0, fog);
         }
-        fragColor.a = 1.0;
     } else {
-<<<<<<< HEAD
-        // discard;
-
-    // Enable this if-statement for 2D window-positioned text
-    // -------------------------------------------------------------------------
-     // if (texture_value == 1) // Fully opaque character pixels.
-     // {
-     //         fragment_colour = vec4(font_colour / 255, texture_value);
-     //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
-     // }
-     // else if (texture_value == 0) // Fully transparent, i.e. background pixels (Note: you cannot use the "discard" method as used for 3D text further down, if colouring in the font's background)
-     // {
-     //         fragment_colour = vec4(font_colour / 255, texture_value);
-     //                 // fragment_colour = vec4(85.0 / 255, 160.0 / 255, 155.0 / 255, 1.0);
-     // }
-     // else // Anti-aliased character pixels.
-     // {
-     //         fragment_colour = vec4(font_colour / 255, texture_value);
-     //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
-     // }
-
-    fragColor = vec4(texture_value, texture_value, 1, 1);
-
-    // Enable these three lines instead for 3D animated text
-    // ----------------------------------------------------------------------
-    // fragment_colour = vec4((texcoords_anim * 2) + vec3(0.25, 0.25, 0.25), texture_value);
-
-    // if (texture_value == 0)
-            //  discard;
-
-
-// void main() {
-//     if (!isFog) {
-//         // vec3 newWorldPos = worldPosition;
-//         // newWorldPos[1] = 0;
-
-//         // if (newWorldPos[0] > 0.5 && newWorldPos[0] < 0.75) {
-//         fragColor = ka * cAmbient;
-//         for (int i = 0; i < numLights; ++i) {
-//             float att = 1.f;
-//             vec3 currLightDir = normalize(vec3(lightPos[i]) - worldPosition);
-//             vec4 lightIntensity = lightColors[i];
-//             float dist = length(vec3(lightPos[i]) - worldPosition);
-//             if (lightType[i] == 0) {
-//                 currLightDir = -normalize(vec3(lightDir[i]));
-//             } else if (lightType[i] == 1) {
-//                 att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-//             } else if (lightType[i] == 2) {
-//                 att = min(1.f, 1.f / (a[i] + b[i] * dist + c[i] * dist * dist));
-//                 float x = acos(dot(-currLightDir, normalize(vec3(lightDir[i]))));
-//                 float innerAngle = angle[i] - penumbra[i];
-//                 float falloff = -2.f * pow((x - innerAngle) / (angle[i] - innerAngle), 3.f) + 3.f * pow((x - innerAngle) / (angle[i] - innerAngle), 2.f);
-//                 if (x <= innerAngle) {
-//                     lightIntensity = lightColors[i];
-//                 } else if (x > innerAngle && x <= angle[i]) {
-//                     lightIntensity *= (1.f - falloff);
-//                 } else {
-//                     lightIntensity = vec4(0, 0, 0, 1);
-//                 }
-//             }
-//             float nl = clamp(dot(normalize(worldNormal), currLightDir), 0.0, 1.0);
-//             float diffuse = kd * nl;
-//             fragColor += att * diffuse * lightIntensity * cDiffuse;
-//             vec3 r = normalize(reflect(-currLightDir, normalize(worldNormal)));
-//             vec3 v = normalize(vec3(cameraPos) - worldPosition);
-//             float rv = clamp(dot(r, v), 0.0, 1.0);
-//             float specular;
-//             if (shininess <= 0.0) {
-//                 specular = 0.0;
-//             } else {
-//                 specular = ks * pow(rv, shininess);
-//             }
-//             fragColor += att * specular * lightColors[i] * cSpecular;
-//         }
-//         fragColor.a = 1.0;
-//         // } else {
-//         //     fragColor = vec4(0, 0, 0, 1);
-//     } else {
-//         float fog = basicFog();
-//         fragColor = vec4(0.41, 0.45, 0.5, 1.0);
-//         vec3 fogColor = vec3(0.53, 0.58, 0.64);
-//         fragColor = mix(fragColor, vec4(fogColor, 1.0), fog);
-//         fragColor.a = mix(0.1, 1.0, fog);;
-//     }
-=======
         // fragColor = vec4(0, 0, 0, 1);
         discard;
->>>>>>> main
     }
 
     // } else {

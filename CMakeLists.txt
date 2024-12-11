@@ -49,12 +49,8 @@ add_executable(${PROJECT_NAME}
     src/shapes/cube.h
     src/camera.h
     src/realtimescene.h
-<<<<<<< Updated upstream
     src/text_fonts_glyphs.h
-
-=======
     src/shapes/fog.h src/shapes/fog.cpp
->>>>>>> Stashed changes
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`

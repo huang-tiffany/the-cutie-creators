@@ -36,7 +36,9 @@ void Realtime::finish() {
 
     // Students: anything requiring OpenGL calls when the program exits should be done here
     glDeleteBuffers(1, &m_vbo_cube);
+    glDeleteBuffers(1, &m_vbo_fog);
     glDeleteBuffers(1, &m_vao_cube);
+    glDeleteBuffers(1, &m_vao_fog);
     glDeleteProgram(m_shader);
     this->doneCurrent();
 
@@ -108,6 +110,7 @@ void Realtime::initializeGL() {
     cube->updateParams(1);
 
     setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
+    setUpShapeData(m_vbo_fog, m_vao_fog, fog.generateFog());
 
     m_text_model = rotate(m_text_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
 
@@ -171,6 +174,9 @@ void Realtime::initializeGL() {
     setUpScene();
 }
 
+
+
+
 void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -219,6 +225,7 @@ void Realtime::paintGL() {
         glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
         glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &m_data.cameraData.pos[0]);
+        glUniform1i(glGetUniformLocation(m_shader, "isFog"), 0);
 
         glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
@@ -604,4 +611,3 @@ void Realtime::saveViewportImage(std::string filePath) {
     glDeleteRenderbuffers(1, &rbo);
     glDeleteFramebuffers(1, &fbo);
 }
-
