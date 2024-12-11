@@ -14,7 +14,7 @@
 
 Realtime::Realtime(QWidget *parent)
     : QOpenGLWidget(parent),
-    camera(Camera{ m_data.cameraData })
+    m_camera(Camera{ m_data.cameraData })
 {
     m_prev_mouse_pos = glm::vec2(size().width()/2, size().height()/2);
     setMouseTracking(true);
@@ -108,7 +108,6 @@ void Realtime::initializeGL() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_shader = ShaderLoader::createShaderProgram(":/resources/shaders/default.vert", ":/resources/shaders/default.frag");
-    m_masking_shader = ShaderLoader::createShaderProgram(":/resources/shaders/masking.vert", ":/resources/shaders/masking.frag");
     m_texture_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
 
     sphere->updateParams(5, 5);
@@ -133,7 +132,9 @@ void Realtime::initializeGL() {
 
     // qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/
     m_text = new Text(m_free_type, size().width(), size().height(), settings.text); // Declare a new text object, passing in your chosen alphabet.
-    m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
+    std::string typefaceFilepath = settings.typeface;
+    typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 130, false);
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -187,22 +188,18 @@ void Realtime::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(m_shader);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &m_model[0][0]);
     glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
     glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
-    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
-    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
-    float RGB[3];
-    RGB[0] = 10.f;
-    RGB[1] = 120.f;
-    RGB[2] = 105.f;
-    unsigned int font_colour_loc = glGetUniformLocation(m_shader, "font_colour");
-    glUniform3fv(font_colour_loc, 1, &RGB[0]);
-
     m_text->draw_messages(m_text->messages.size() - 1);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+    glViewport(0, 0, m_screen_width, m_screen_height);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
+    glUseProgram(0);
+
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // if commented out, will display text bc we painttexture above. if not commented out, then clear screen before drawing city
 
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
@@ -238,13 +235,9 @@ void Realtime::paintGL() {
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
 
-        int gridSizeX = m_text->messages[m_text->messages.size() - 1].alphabet_texture_width / 10.f;
-        int gridSizeZ = m_text->messages[m_text->messages.size() - 1].alphabet_texture_height / 10.f;
-        glm::mat4 text_model = glm::translate(glm::mat4(1.0f), glm::vec3(gridSizeX / -20.f, 0, gridSizeZ / -20.f));
-
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "text_model"), 1, GL_FALSE, &m_model[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &camera.getViewMatrix()[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
         glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
         glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
@@ -265,7 +258,7 @@ void Realtime::paintGL() {
         // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
         glUniform1i(glGetUniformLocation(m_shader, "isText"), false);
-        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(m_camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
 
         // switch (shape.primitive.type) {
         // case PrimitiveType::PRIMITIVE_SPHERE:
@@ -290,11 +283,7 @@ void Realtime::paintGL() {
     }
 
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-    glViewport(0, 0, m_screen_width, m_screen_height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
-    glUseProgram(0);
+
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -313,7 +302,7 @@ void Realtime::resizeGL(int w, int h) {
     makeFBO();
 
     float c = -settings.nearPlane / settings.farPlane;
-    float widthAngle = float(size().width()) / float(size().height()) * camera.getHeightAngle();
+    float widthAngle = float(size().width()) / float(size().height()) * m_camera.getHeightAngle();
     m_proj = glm::mat4(1.f, 0.f, 0.f, 0.f,
                        0.f, 1.f, 0.f, 0.f,
                        0.f, 0.f, -2.f, 0.f,
@@ -323,7 +312,7 @@ void Realtime::resizeGL(int w, int h) {
                        0.f, 0.f, 1.f / (1.f + c), -1,
                        0.f, 0.f, -c / (1.f + c), 0.f) *
              glm::mat4(1.f / (settings.farPlane * tan(widthAngle / 2.f)), 0.f, 0.f, 0.f,
-                       0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
+                       0.f, 1.f / (settings.farPlane * tan(m_camera.getHeightAngle() / 2.f)), 0.f, 0.f,
                        0.f, 0.f, 1.f / settings.farPlane, 0.f,
                        0.f, 0.f, 0.f, 1.f);
 }
@@ -352,10 +341,6 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 
 void Realtime::setUpScene() {
     m_data = RenderData();
-    // bool success = SceneParser::parse(settings.sceneFilePath, m_data);
-    // if (!success) {
-    //     std::cerr << "Error loading scene" << std::endl;
-    // }
 
     m_data.cameraData.pos = glm::vec4(0.f, 0.f, 20.f, 1.f);
     m_data.cameraData.look = glm::vec4(0.f, 0.f, -20.f, 0.f);
@@ -378,7 +363,7 @@ void Realtime::setUpScene() {
     generateCity();
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
-    camera = scene.getCamera();
+    m_camera = scene.getCamera();
 
     m_numLights = m_data.lights.size();
     for (int i = 0; i < m_numLights; i++) {
@@ -405,7 +390,7 @@ void Realtime::setUpScene() {
     }
 
     float c = -settings.nearPlane / settings.farPlane;
-    float widthAngle = float(size().width()) / float(size().height()) * camera.getHeightAngle();
+    float widthAngle = float(size().width()) / float(size().height()) * m_camera.getHeightAngle();
     m_proj = glm::mat4(1.f, 0.f, 0.f, 0.f,
                        0.f, 1.f, 0.f, 0.f,
                        0.f, 0.f, -2.f, 0.f,
@@ -415,14 +400,9 @@ void Realtime::setUpScene() {
                        0.f, 0.f, 1.f / (1.f + c), -1,
                        0.f, 0.f, -c / (1.f + c), 0.f) *
              glm::mat4(1.f / (settings.farPlane * tan(widthAngle / 2.f)), 0.f, 0.f, 0.f,
-                       0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
+                       0.f, 1.f / (settings.farPlane * tan(m_camera.getHeightAngle() / 2.f)), 0.f, 0.f,
                        0.f, 0.f, 1.f / settings.farPlane, 0.f,
                        0.f, 0.f, 0.f, 1.f);
-}
-
-void Realtime::sceneChanged() {
-    setUpScene();
-    update(); // asks for a PaintGL() call to occur
 }
 
 void Realtime::generateCity() {
@@ -483,40 +463,15 @@ void Realtime::generateCity() {
 
 void Realtime::settingsChanged() {
     if (initFinish) {
-        sphere->clearData();
-        cube->clearData();
-        cone->clearData();
-        cylinder->clearData();
 
         free(m_text);
+
         m_text = new Text(m_free_type, size().width(), size().height(), settings.text); // Declare a new text object, passing in your chosen alphabet.
-        m_text->create_text_message(settings.text, 0, 0, "/Users/Tiffany/Desktop/csci1230/the-cutie-creators/resources/typefaces/RubikMonoOne-Regular.ttf", 130, false);
+        std::string typefaceFilepath = settings.typeface;
+        typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 130, false);
 
         generateCity();
-
-        sphere->updateParams(settings.shapeParameter1, settings.shapeParameter2);
-        setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
-        cube->updateParams(settings.shapeParameter1);
-        setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
-        cone->updateParams(settings.shapeParameter1, settings.shapeParameter2);
-        setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
-        cylinder->updateParams(settings.shapeParameter1, settings.shapeParameter2);
-        setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
-
-        float c = -settings.nearPlane / settings.farPlane;
-        float widthAngle = float(size().width()) / float(size().height()) * camera.getHeightAngle();
-        m_proj = glm::mat4(1.f, 0.f, 0.f, 0.f,
-                           0.f, 1.f, 0.f, 0.f,
-                           0.f, 0.f, -2.f, 0.f,
-                           0.f, 0.f, -1.f, 1.f) *
-                 glm::mat4(1.f, 0.f, 0.f, 0.f,
-                           0.f, 1.f, 0.f, 0.f,
-                           0.f, 0.f, 1.f / (1.f + c), -1,
-                           0.f, 0.f, -c / (1.f + c), 0.f) *
-                 glm::mat4(1.f / (settings.farPlane * tan(widthAngle / 2.f)), 0.f, 0.f, 0.f,
-                           0.f, 1.f / (settings.farPlane * tan(camera.getHeightAngle() / 2.f)), 0.f, 0.f,
-                           0.f, 0.f, 1.f / settings.farPlane, 0.f,
-                           0.f, 0.f, 0.f, 1.f);
     }
     update(); // asks for a PaintGL() call to occur
 }
@@ -548,11 +503,6 @@ void Realtime::makeFBO(){
 
 void Realtime::paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture){
     glUseProgram(m_texture_shader);
-
-    glUniform1i(glGetUniformLocation(m_texture_shader, "togglePerPixelTexture"), togglePerPixelTexture);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "toggleKernelTexture"), toggleKernelTexture);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "fboWidth"), m_fbo_width);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "fboHeight"), m_fbo_height);
 
     glBindVertexArray(m_fullscreen_vao);
     glActiveTexture(GL_TEXTURE0);
@@ -593,64 +543,15 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
         int deltaY = posY - m_prev_mouse_pos.y;
         m_prev_mouse_pos = glm::vec2(posX, posY);
 
-        float xChange = deltaX * -0.01f;
+        float xChange = deltaX * 0.01f;
         float yChange = deltaY * -0.01f;
 
-        // glm::vec3 look = glm::vec3(m_data.cameraData.look);
-        m_model = rotate(m_model, -xChange, glm::vec3(0.0f, 0.f, 1.0f));
-
-        // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
-        glm::vec3 up = glm::vec3(0, 1, 0);
-        // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
-
+        m_model = rotate(m_model, xChange, glm::vec3(0.0f, 0.f, 1.0f));
         m_model = rotate(m_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
-        // look = glm::vec3(modelMatrix * glm::vec4(look, 0.0f));
-        // up = glm::vec3(modelMatrix * glm::vec4(up, 0.0f));
-
-        // m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
-        // m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
-
-        // RealtimeScene scene{ size().width(), size().height(), m_data };
-        // camera = scene.getCamera();
 
         update(); // asks for a PaintGL() call to occur
     }
 }
-
-
-// void Realtime::mouseMoveEvent(QMouseEvent *event) {
-//     if (m_mouseDown) {
-//         int posX = event->position().x();
-//         int posY = event->position().y();
-//         int deltaX = posX - m_prev_mouse_pos.x;
-//         int deltaY = posY - m_prev_mouse_pos.y;
-//         m_prev_mouse_pos = glm::vec2(posX, posY);
-
-//         float xChange = deltaX * 0.2f;
-//         float yChange = deltaY * 0.2f;
-
-//         glm::vec3 look = glm::vec3(m_data.cameraData.look);
-//         glm::mat4 cameraMatrix = glm::mat4(1.0f);
-//         cameraMatrix = rotate(cameraMatrix, glm::radians(xChange), glm::vec3(0.0f, 1.0f, 0.0f));
-
-//         look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
-//         glm::vec3 up = glm::vec3(m_data.cameraData.up);
-//         up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
-
-//         glm::vec3 rightDirection = glm::normalize(glm::cross(look, up));
-//         cameraMatrix = rotate(glm::mat4(1.0f), glm::radians(yChange), rightDirection);
-//         look = glm::vec3(cameraMatrix * glm::vec4(look, 0.0f));
-//         up = glm::vec3(cameraMatrix * glm::vec4(up, 0.0f));
-
-//         m_data.cameraData.look = glm::vec4(glm::normalize(look), 0.0f);
-//         m_data.cameraData.up = glm::vec4(glm::normalize(up), 0.0f);
-
-//         RealtimeScene scene{ size().width(), size().height(), m_data };
-//         camera = scene.getCamera();
-
-//         update(); // asks for a PaintGL() call to occur
-//     }
-// }
 
 void Realtime::timerEvent(QTimerEvent *event) {
     int elapsedms   = m_elapsedTimer.elapsed();
@@ -680,7 +581,7 @@ void Realtime::timerEvent(QTimerEvent *event) {
     m_data.cameraData.pos += glm::vec4(move * 5.f * deltaTime, 0.f);
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
-    camera = scene.getCamera();
+    m_camera = scene.getCamera();
 
     update(); // asks for a PaintGL() call to occur
 }

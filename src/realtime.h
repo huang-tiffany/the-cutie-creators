@@ -30,7 +30,6 @@ public:
     void finish();                                      // Called on program exit
     void setUpScene();
     void setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<float> shapeData);
-    void sceneChanged();
     void settingsChanged();
     void saveViewportImage(std::string filePath);
 
@@ -68,10 +67,9 @@ private:
     bool initFinish = false;
 
     RenderData m_data;
-    Camera camera;
+    Camera m_camera;
 
     GLuint m_shader; // Stores id of shader program
-    GLuint m_masking_shader;
     GLuint m_vbo_sphere;
     GLuint m_vbo_cube;
     GLuint m_vbo_cone;

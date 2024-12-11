@@ -86,11 +86,13 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
     FILES
         resources/shaders/default.frag
         resources/shaders/default.vert
-        resources/shaders/masking.frag
-        resources/shaders/masking.vert
         resources/shaders/texture.vert
         resources/shaders/texture.frag
-        resources/typefaces/RubikMonoOne-Regular.ttf
+        resources/typefaces/RubikMonoOne.ttf
+        resources/typefaces/Karla.ttf
+        resources/typefaces/Jacquard24.ttf
+        resources/typefaces/InstrumentSerif.ttf
+        resources/typefaces/FKGroteskSemiMono.ttf
 )
 
 # GLEW: this provides support for Windows (including 64-bit)
