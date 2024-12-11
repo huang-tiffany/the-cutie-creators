@@ -26,8 +26,6 @@ void main(void)
         gl_Position = proj * view * text_model * model * objectPosition;
         texture_coordinates = vec2(worldPosition[0] / float(alphabet_texture_width / 100.f) + 0.5, worldPosition[2] / float(alphabet_texture_height / 100.f) + 0.5); // Same as using z and w... i.e. vertex.zw
     } else {
-        // Enable this line for 2D window-positioned text
-        // -------------------------------------------------------------
         gl_Position = vec4(objectPosition.x/2, objectPosition.y, 0.0, 1.0);
         texture_coordinates = vec2(objectPosition[2], objectPosition[3]); // Same as using z and w... i.e. vertex.zw
     }

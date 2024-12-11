@@ -73,38 +73,11 @@ void main() {
             }
             fragColor.a = 1.0;
         } else {
-            fragColor = vec4(0, 0, 0, 1);
+            // fragColor = vec4(0, 0, 0, 1);
+            discard;
         }
 
     } else {
-        // discard;
-
-    // Enable this if-statement for 2D window-positioned text
-    // -------------------------------------------------------------------------
-     // if (texture_value == 1) // Fully opaque character pixels.
-     // {
-     //         fragment_colour = vec4(font_colour / 255, texture_value);
-     //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
-     // }
-     // else if (texture_value == 0) // Fully transparent, i.e. background pixels (Note: you cannot use the "discard" method as used for 3D text further down, if colouring in the font's background)
-     // {
-     //         fragment_colour = vec4(font_colour / 255, texture_value);
-     //                 // fragment_colour = vec4(85.0 / 255, 160.0 / 255, 155.0 / 255, 1.0);
-     // }
-     // else // Anti-aliased character pixels.
-     // {
-     //         fragment_colour = vec4(font_colour / 255, texture_value);
-     //                 // fragment_colour = vec4(255 / 255, 255 / 255, 255 / 255, 1.0);
-     // }
-
-    fragColor = vec4(texture_value, texture_value, 1, 1);
-
-    // Enable these three lines instead for 3D animated text
-    // ----------------------------------------------------------------------
-    // fragment_colour = vec4((texcoords_anim * 2) + vec3(0.25, 0.25, 0.25), texture_value);
-
-    // if (texture_value == 0)
-            //  discard;
-
+        fragColor = vec4(texture_value, texture_value, 1, 1);
     }
 }

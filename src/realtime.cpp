@@ -185,62 +185,15 @@ void Realtime::initializeGL() {
 
 
 void Realtime::paintGL() {
-    // glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
-    // glViewport(0, 0, dims[0], dims[1]);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    // glm::vec4 topLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].top_left_tr1;
-    // glm::vec4 topRight = m_text->messages[m_text->messages.size() - 1].characters_quads[m_text->messages[m_text->messages.size() - 1].characters_quads.size() - 1].top_right_tr2;
-    // glm::vec4 bottomLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].bottom_left_tr1;
-
-    // int width = topRight.x - topLeft.x;
-    // int height = bottomLeft.y - topLeft.y;
-
-
-    glClearColor(1,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glUseProgram(m_shader);
-    glUniform1i(glGetUniformLocation(m_shader, "isText"), true);
-    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
-    m_text->draw_messages(m_text->messages.size() - 1);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-    glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
-    glUseProgram(0);
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // if commented out, will display text bc we painttexture above. if not commented out, then clear screen before drawing city
+    m_text->draw_messages(m_text->messages.size() - 1);
 
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
-        // switch (shape.primitive.type) {
-        // case PrimitiveType::PRIMITIVE_SPHERE:
-        //     glBindVertexArray(m_vao_sphere);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_CUBE:
-        //     glBindVertexArray(m_vao_cube);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_CONE:
-        //     glBindVertexArray(m_vao_cone);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_CYLINDER:
-        //     glBindVertexArray(m_vao_cylinder);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_MESH:
-        //     break;
-        // }
-
-        // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
-        // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
-        // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
-
-
         glActiveTexture(GL_TEXTURE31);
-        // glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
 
         glm::vec4 cAmbient(1, 1, 1, 1);
         glm::vec4 cDiffuse(1, 1, 1, 1);
@@ -271,27 +224,9 @@ void Realtime::paintGL() {
         glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
         glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
         glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
-        // glUniform1f(glGetUniformLocation(m_shader, "shininess"), shape.primitive.material.shininess);
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
         glUniform1i(glGetUniformLocation(m_shader, "isText"), false);
         glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(m_camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
-
-        // switch (shape.primitive.type) {
-        // case PrimitiveType::PRIMITIVE_SPHERE:
-        //     glDrawArrays(GL_TRIANGLES, 0, sphere->generateShape().size() / 6);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_CUBE:
-        //     glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_CONE:
-        //     glDrawArrays(GL_TRIANGLES, 0, cone->generateShape().size() / 6);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_CYLINDER:
-        //     glDrawArrays(GL_TRIANGLES, 0, cylinder->generateShape().size() / 6);
-        //     break;
-        // case PrimitiveType::PRIMITIVE_MESH:
-        //     break;
-        // }
 
         glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
