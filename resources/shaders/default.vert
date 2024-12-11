@@ -18,7 +18,7 @@ uniform int alphabet_texture_height;
 
 void main(void)
 {
-    // if (!isText) {
+    // if (!isText) { // uncomment to visualize text. don't forget to draw it in realtime.cpp
     worldPosition = vec3(model * objectPosition);
     worldNormal = vec3(transp_inv_model_matrix * vec4(normalize(objectNormal), 0));
     gl_Position = mvp_matrix * objectPosition;
