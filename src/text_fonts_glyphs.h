@@ -462,14 +462,95 @@ private:
             new_message.alphabet_texture_width = (curr_row_width > max_row_width) ? curr_row_width : max_row_width;
             // std::cout << "\n\n   alphabet_texture_width: " << alphabet_texture_width;
         }
-        new_message.alphabet_texture_height = number_of_rows * (new_message.tallest_font_height + alphabet_padding * 2);
+        new_message.alphabet_texture_height = number_of_rows * (new_message.tallest_font_height + alphabet_padding * 2) * 2;
 
         std::cout << "\n\n   alphabet_texture_width: " << new_message.alphabet_texture_width
                   << " --- alphabet_texture_height: " << new_message.alphabet_texture_height << "\n";
     }
 
-    void format_alphabet_texture_image(Message_Parent& new_message)
-    {
+    // void format_alphabet_texture_image(Message_Parent& new_message)
+    // {
+    //     glActiveTexture(GL_TEXTURE31);
+    //     glBindTexture(GL_TEXTURE_2D, new_message.alphabet_texture);
+
+    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    //     // Initialise empty data: https://stackoverflow.com/questions/7195130/how-to-efficiently-initialize-texture-with-zeroes
+    //     std::vector<GLubyte> empty_data(new_message.alphabet_texture_width * new_message.alphabet_texture_height, 0); // GL_RED = 8 bits = 1 byte.
+
+    //     //  https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+    //     // "Each element is a single red component. OpenGL converts it to floating point and assembles it to RGBA, by attaching 0 for green and blue, and 1 for alpha. Each component is clamped to the range [0, 1]"
+    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, new_message.alphabet_texture_width, new_message.alphabet_texture_height, 0, GL_RED, GL_UNSIGNED_BYTE, &empty_data[0]);
+
+    //     int character_count = 0;
+    //     int increment_x = alphabet_padding;
+    //     int increment_y = alphabet_padding;
+
+    //     new_message.relative_distance = new_message.tallest_font_height; // Set relative distance to initial value.
+
+    //     for (unsigned i = 0; i < alphabet_string.size(); ++i)
+    //     {
+    //         FT_Load_Char(face, alphabet_string[i], FT_LOAD_RENDER); // "glyph" as used below... is shorthand for "face->glyph"
+
+    //         int tex_coord_left = increment_x - alphabet_padding;
+    //         glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, increment_y, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
+    //         int tex_coord_right = increment_x + glyph->bitmap.width + alphabet_padding;
+
+    //         int tex_coord_bottom = increment_y - alphabet_padding;
+    //         int tex_coord_top = increment_y + glyph->bitmap.rows + alphabet_padding;
+
+    //         increment_x += glyph->bitmap.width + (alphabet_padding * 2);
+
+    //         // By default the characters are bottom aligned (Note: bitmap_top = the "Remaining Distance" above that bottom alignment, after having been moved downwards by "bottom_bearing" to produce character-origin alignment)
+    //         // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //         if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
+    //             new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top; // Record the smallest... Tallest Font - "Remaining Distance" (incidentally, the tallest font is also checked against itself by doing this)
+
+    //         // FT_GlyphSlotRec: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyphslotrec (Also available: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyph_metrics)
+    //         // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //         Alphabet_Characters alphabet_character{};
+    //         alphabet_character.glyph_advance_x = (glyph->advance.x / 64) * scale_pixels_x_to_OpenGL;
+
+    //         // The values below are in pixels...  FT_Bitmap: https://freetype.org/freetype2/docs/reference/ft2-basic_types.html#ft_bitmap
+    //         // --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //         alphabet_character.left_bearing = glyph->bitmap_left * scale_pixels_x_to_OpenGL;
+    //         alphabet_character.width_plus_padding = (tex_coord_right - tex_coord_left) * scale_pixels_x_to_OpenGL;
+    //         alphabet_character.bottom_bearing = ((int)glyph->bitmap.rows - (int)glyph->bitmap_top) * scale_pixels_y_to_OpenGL;
+    //         alphabet_character.height_plus_padding = (tex_coord_top - tex_coord_bottom) * scale_pixels_y_to_OpenGL;
+    //         alphabet_character.character = alphabet_string[i];
+
+    //         std::cout << "\n   CHARACTER: " << alphabet_string[i] << "\n   glyph->advance.x: " << glyph->advance.x << "\n   glyph->advance.x / 64: " << glyph->advance.x / 64
+    //                   << "\n   glyph->bitmap_left: " << glyph->bitmap_left << "\n   glyph->bitmap.width: " << glyph->bitmap.width << "\n   glyph->bitmap.rows: " << glyph->bitmap.rows
+    //                   << "\n   bottom bearing (height - top): " << (int)glyph->bitmap.rows - (int)glyph->bitmap_top << "\n   top bearing (bitmap_top): " << glyph->bitmap_top << "\n";
+
+    //         // Texture Coordinates Section (divide texture coordinate position values by texture size to get range [0, 1])
+    //         // ------------------------------------------------------------------------------------------------------------------------------------------
+    //         alphabet_character.texcoord_top_left.x = (float)tex_coord_left / (float)new_message.alphabet_texture_width;
+    //         alphabet_character.texcoord_top_left.y = (float)(tex_coord_top) / (float)new_message.alphabet_texture_height;
+
+    //         alphabet_character.texcoord_top_right.x = (float)(tex_coord_right) / (float)new_message.alphabet_texture_width;
+    //         alphabet_character.texcoord_top_right.y = (float)(tex_coord_top) / (float)new_message.alphabet_texture_height;
+
+    //         alphabet_character.texcoord_bottom_left.x = (float)(tex_coord_left) / (float)new_message.alphabet_texture_width;
+    //         alphabet_character.texcoord_bottom_left.y = (float)(tex_coord_bottom) / (float)new_message.alphabet_texture_height;
+
+    //         alphabet_character.texcoord_bottom_right.x = (float)(tex_coord_right) / (float)new_message.alphabet_texture_width;
+    //         alphabet_character.texcoord_bottom_right.y = (float)(tex_coord_bottom) / (float)new_message.alphabet_texture_height;
+
+    //         new_message.alphabet_vec.push_back(alphabet_character); // Used in: process_text_compare()
+
+    //         ++character_count;
+    //         if (character_count == character_row_limit)
+    //         {
+    //             character_count = 0;
+    //             increment_y += new_message.tallest_font_height + (alphabet_padding * 2);
+    //             increment_x = alphabet_padding;
+    //         }
+    //     }
+    //     glActiveTexture(GL_TEXTURE0);
+    // }
+
+    void format_alphabet_texture_image(Message_Parent& new_message) {
         glActiveTexture(GL_TEXTURE31);
         glBindTexture(GL_TEXTURE_2D, new_message.alphabet_texture);
 
@@ -488,23 +569,34 @@ private:
 
         new_message.relative_distance = new_message.tallest_font_height; // Set relative distance to initial value.
 
+        for (unsigned i = 0; i < alphabet_string.size(); ++i) {
+            if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
+                new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top;
+        }
+
         for (unsigned i = 0; i < alphabet_string.size(); ++i)
         {
             FT_Load_Char(face, alphabet_string[i], FT_LOAD_RENDER); // "glyph" as used below... is shorthand for "face->glyph"
 
+
+
             int tex_coord_left = increment_x - alphabet_padding;
-            glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, increment_y, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
             int tex_coord_right = increment_x + glyph->bitmap.width + alphabet_padding;
 
             int tex_coord_bottom = increment_y - alphabet_padding;
             int tex_coord_top = increment_y + glyph->bitmap.rows + alphabet_padding;
 
+            float bottom_bearing = ((int)glyph->bitmap.rows - (int)glyph->bitmap_top) * scale_pixels_y_to_OpenGL;
+            float height_plus_padding = (tex_coord_top - tex_coord_bottom) * scale_pixels_y_to_OpenGL;
+
+            glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, new_message.alphabet_texture_height * (2.f / 3.f) - glyph->bitmap_top, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
+
             increment_x += glyph->bitmap.width + (alphabet_padding * 2);
 
             // By default the characters are bottom aligned (Note: bitmap_top = the "Remaining Distance" above that bottom alignment, after having been moved downwards by "bottom_bearing" to produce character-origin alignment)
             // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
-                new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top; // Record the smallest... Tallest Font - "Remaining Distance" (incidentally, the tallest font is also checked against itself by doing this)
+            // if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
+            //     new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top; // Record the smallest... Tallest Font - "Remaining Distance" (incidentally, the tallest font is also checked against itself by doing this)
 
             // FT_GlyphSlotRec: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyphslotrec (Also available: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyph_metrics)
             // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

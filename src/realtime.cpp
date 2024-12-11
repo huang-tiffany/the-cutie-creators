@@ -185,8 +185,8 @@ void Realtime::initializeGL() {
 
 
 void Realtime::paintGL() {
-    glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
-    glViewport(0, 0, dims[0], dims[1]);
+    // glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+    // glViewport(0, 0, dims[0], dims[1]);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     // glm::vec4 topLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].top_left_tr1;
     // glm::vec4 topRight = m_text->messages[m_text->messages.size() - 1].characters_quads[m_text->messages[m_text->messages.size() - 1].characters_quads.size() - 1].top_right_tr2;
@@ -211,7 +211,7 @@ void Realtime::paintGL() {
     paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
     glUseProgram(0);
 
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // if commented out, will display text bc we painttexture above. if not commented out, then clear screen before drawing city
 
     for (RenderShapeData shape : m_data.shapes) {
@@ -239,15 +239,15 @@ void Realtime::paintGL() {
         // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
 
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
+        glActiveTexture(GL_TEXTURE31);
+        // glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
 
         glm::vec4 cAmbient(1, 1, 1, 1);
         glm::vec4 cDiffuse(1, 1, 1, 1);
         glm::vec4 cSpecular(1, 1, 1, 1);
 
         glUseProgram(m_shader);
-        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 0);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
 
