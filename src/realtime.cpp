@@ -134,7 +134,7 @@ void Realtime::initializeGL() {
     m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
     std::string typefaceFilepath = settings.typeface;
     typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 130, false);
+    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 120, false);
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -355,8 +355,8 @@ void Realtime::setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<
 void Realtime::setUpScene() {
     m_data = RenderData();
 
-    m_data.cameraData.pos = glm::vec4(0.f, 0.f, 20.f, 1.f);
-    m_data.cameraData.look = glm::vec4(0.f, 0.f, -20.f, 0.f);
+    m_data.cameraData.pos = glm::vec4(0.f, 0.f, 15.f, 1.f);
+    m_data.cameraData.look = glm::vec4(0.f, 0.f, -15.f, 0.f);
     m_data.cameraData.up = glm::vec4(0, 1, 0, 0);
     m_data.cameraData.heightAngle = 30 * M_PI / 180.f;;
     m_data.globalData.ka = 0.5;
@@ -480,7 +480,7 @@ void Realtime::settingsChanged() {
         m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
         std::string typefaceFilepath = settings.typeface;
         typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 130, false);
+        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 120, false);
 
         glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
         glViewport(0, 0, dims[0], dims[1]);
