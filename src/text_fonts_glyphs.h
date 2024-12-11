@@ -38,6 +38,28 @@ private:
         glm::vec4 top_right_tr2;
     };
 
+    // --------------------------------
+    std::string alphabet_string;
+
+    FT_Library& free_type;
+    FT_GlyphSlot glyph; // "glyph" (FT_GlyphSlot) is simply being used as shorthand for "face" (FT_Face) ->glyph... set in: set_font_parameters()
+
+    float scale_pixels_x_to_OpenGL = 0.0f; // OpenGL [-1, 1] (i.e. 2) divided by the number of screen pixels.
+    float scale_pixels_y_to_OpenGL = 0.0f;
+
+    int character_row_limit = 150; // Alphabet character row limit.
+    int alphabet_padding = 5; // Padding is optional (it spaces out the alphabet characters, without affecting each message's character spacing)
+    // Note: if character background is slightly opaque e.g. 0.1 = vec4(1, 1, 1, texture(text_Texture, texture_coordinates).r) + 0.1, then spaces, i.e. simply " " show as a: alphabet_padding * alphabet_padding square.
+
+public:
+
+    Text(FT_Library& free_type, int window_width, int window_height, std::string alphabet_string) : free_type(free_type)
+    {
+        this->alphabet_string = alphabet_string;
+        scale_pixels_x_to_OpenGL = 2.0f / window_width; // Scale vertex data to render on-screen the same size as the font's set pixel-size...
+        scale_pixels_y_to_OpenGL = 2.0f / window_height; // This makes the text display at the same correct pixel size, regardless of the window size.
+    }
+
     struct Message_Parent
     {
         unsigned VAO_message, VBO_message, VAO_alphabet, VBO_alphabet;
@@ -70,30 +92,10 @@ private:
 
         std::string font_path;
     };
-    // --------------------------------
-    std::string alphabet_string;
 
-    FT_Library& free_type;
-    FT_GlyphSlot glyph; // "glyph" (FT_GlyphSlot) is simply being used as shorthand for "face" (FT_Face) ->glyph... set in: set_font_parameters()
-
-    float scale_pixels_x_to_OpenGL = 0.0f; // OpenGL [-1, 1] (i.e. 2) divided by the number of screen pixels.
-    float scale_pixels_y_to_OpenGL = 0.0f;
-
-    int character_row_limit = 150; // Alphabet character row limit.
-    int alphabet_padding = 5; // Padding is optional (it spaces out the alphabet characters, without affecting each message's character spacing)
-    // Note: if character background is slightly opaque e.g. 0.1 = vec4(1, 1, 1, texture(text_Texture, texture_coordinates).r) + 0.1, then spaces, i.e. simply " " show as a: alphabet_padding * alphabet_padding square.
-
-public:
     FT_Face face; // Resources are freed in main() via FT_Done_Face(...)
 
     std::vector<Message_Parent> messages;
-
-    Text(FT_Library& free_type, int window_width, int window_height, std::string alphabet_string) : free_type(free_type)
-    {
-        this->alphabet_string = alphabet_string;
-        scale_pixels_x_to_OpenGL = 2.0f / window_width; // Scale vertex data to render on-screen the same size as the font's set pixel-size...
-        scale_pixels_y_to_OpenGL = 2.0f / window_height; // This makes the text display at the same correct pixel size, regardless of the window size.
-    }
 
     glm::vec2 calculate_message_image_size(Message_Parent& new_message)
     {
@@ -468,88 +470,6 @@ private:
                   << " --- alphabet_texture_height: " << new_message.alphabet_texture_height << "\n";
     }
 
-    // void format_alphabet_texture_image(Message_Parent& new_message)
-    // {
-    //     glActiveTexture(GL_TEXTURE31);
-    //     glBindTexture(GL_TEXTURE_2D, new_message.alphabet_texture);
-
-    //     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    //     // Initialise empty data: https://stackoverflow.com/questions/7195130/how-to-efficiently-initialize-texture-with-zeroes
-    //     std::vector<GLubyte> empty_data(new_message.alphabet_texture_width * new_message.alphabet_texture_height, 0); // GL_RED = 8 bits = 1 byte.
-
-    //     //  https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
-    //     // "Each element is a single red component. OpenGL converts it to floating point and assembles it to RGBA, by attaching 0 for green and blue, and 1 for alpha. Each component is clamped to the range [0, 1]"
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, new_message.alphabet_texture_width, new_message.alphabet_texture_height, 0, GL_RED, GL_UNSIGNED_BYTE, &empty_data[0]);
-
-    //     int character_count = 0;
-    //     int increment_x = alphabet_padding;
-    //     int increment_y = alphabet_padding;
-
-    //     new_message.relative_distance = new_message.tallest_font_height; // Set relative distance to initial value.
-
-    //     for (unsigned i = 0; i < alphabet_string.size(); ++i)
-    //     {
-    //         FT_Load_Char(face, alphabet_string[i], FT_LOAD_RENDER); // "glyph" as used below... is shorthand for "face->glyph"
-
-    //         int tex_coord_left = increment_x - alphabet_padding;
-    //         glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, increment_y, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
-    //         int tex_coord_right = increment_x + glyph->bitmap.width + alphabet_padding;
-
-    //         int tex_coord_bottom = increment_y - alphabet_padding;
-    //         int tex_coord_top = increment_y + glyph->bitmap.rows + alphabet_padding;
-
-    //         increment_x += glyph->bitmap.width + (alphabet_padding * 2);
-
-    //         // By default the characters are bottom aligned (Note: bitmap_top = the "Remaining Distance" above that bottom alignment, after having been moved downwards by "bottom_bearing" to produce character-origin alignment)
-    //         // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //         if (new_message.relative_distance > new_message.tallest_font_height - glyph->bitmap_top)
-    //             new_message.relative_distance = new_message.tallest_font_height - glyph->bitmap_top; // Record the smallest... Tallest Font - "Remaining Distance" (incidentally, the tallest font is also checked against itself by doing this)
-
-    //         // FT_GlyphSlotRec: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyphslotrec (Also available: https://freetype.org/freetype2/docs/reference/ft2-base_interface.html#ft_glyph_metrics)
-    //         // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //         Alphabet_Characters alphabet_character{};
-    //         alphabet_character.glyph_advance_x = (glyph->advance.x / 64) * scale_pixels_x_to_OpenGL;
-
-    //         // The values below are in pixels...  FT_Bitmap: https://freetype.org/freetype2/docs/reference/ft2-basic_types.html#ft_bitmap
-    //         // --------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //         alphabet_character.left_bearing = glyph->bitmap_left * scale_pixels_x_to_OpenGL;
-    //         alphabet_character.width_plus_padding = (tex_coord_right - tex_coord_left) * scale_pixels_x_to_OpenGL;
-    //         alphabet_character.bottom_bearing = ((int)glyph->bitmap.rows - (int)glyph->bitmap_top) * scale_pixels_y_to_OpenGL;
-    //         alphabet_character.height_plus_padding = (tex_coord_top - tex_coord_bottom) * scale_pixels_y_to_OpenGL;
-    //         alphabet_character.character = alphabet_string[i];
-
-    //         std::cout << "\n   CHARACTER: " << alphabet_string[i] << "\n   glyph->advance.x: " << glyph->advance.x << "\n   glyph->advance.x / 64: " << glyph->advance.x / 64
-    //                   << "\n   glyph->bitmap_left: " << glyph->bitmap_left << "\n   glyph->bitmap.width: " << glyph->bitmap.width << "\n   glyph->bitmap.rows: " << glyph->bitmap.rows
-    //                   << "\n   bottom bearing (height - top): " << (int)glyph->bitmap.rows - (int)glyph->bitmap_top << "\n   top bearing (bitmap_top): " << glyph->bitmap_top << "\n";
-
-    //         // Texture Coordinates Section (divide texture coordinate position values by texture size to get range [0, 1])
-    //         // ------------------------------------------------------------------------------------------------------------------------------------------
-    //         alphabet_character.texcoord_top_left.x = (float)tex_coord_left / (float)new_message.alphabet_texture_width;
-    //         alphabet_character.texcoord_top_left.y = (float)(tex_coord_top) / (float)new_message.alphabet_texture_height;
-
-    //         alphabet_character.texcoord_top_right.x = (float)(tex_coord_right) / (float)new_message.alphabet_texture_width;
-    //         alphabet_character.texcoord_top_right.y = (float)(tex_coord_top) / (float)new_message.alphabet_texture_height;
-
-    //         alphabet_character.texcoord_bottom_left.x = (float)(tex_coord_left) / (float)new_message.alphabet_texture_width;
-    //         alphabet_character.texcoord_bottom_left.y = (float)(tex_coord_bottom) / (float)new_message.alphabet_texture_height;
-
-    //         alphabet_character.texcoord_bottom_right.x = (float)(tex_coord_right) / (float)new_message.alphabet_texture_width;
-    //         alphabet_character.texcoord_bottom_right.y = (float)(tex_coord_bottom) / (float)new_message.alphabet_texture_height;
-
-    //         new_message.alphabet_vec.push_back(alphabet_character); // Used in: process_text_compare()
-
-    //         ++character_count;
-    //         if (character_count == character_row_limit)
-    //         {
-    //             character_count = 0;
-    //             increment_y += new_message.tallest_font_height + (alphabet_padding * 2);
-    //             increment_x = alphabet_padding;
-    //         }
-    //     }
-    //     glActiveTexture(GL_TEXTURE0);
-    // }
-
     void format_alphabet_texture_image(Message_Parent& new_message) {
         glActiveTexture(GL_TEXTURE31);
         glBindTexture(GL_TEXTURE_2D, new_message.alphabet_texture);
@@ -562,6 +482,9 @@ private:
         //  https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
         // "Each element is a single red component. OpenGL converts it to floating point and assembles it to RGBA, by attaching 0 for green and blue, and 1 for alpha. Each component is clamped to the range [0, 1]"
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, new_message.alphabet_texture_width, new_message.alphabet_texture_height, 0, GL_RED, GL_UNSIGNED_BYTE, &empty_data[0]);
+
+        // modified to use alphabet instead of messages when drawing. originally this:
+        // glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, increment_y, glyph->bitmap.width, glyph->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
 
         int character_count = 0;
         int increment_x = alphabet_padding;
@@ -577,8 +500,6 @@ private:
         for (unsigned i = 0; i < alphabet_string.size(); ++i)
         {
             FT_Load_Char(face, alphabet_string[i], FT_LOAD_RENDER); // "glyph" as used below... is shorthand for "face->glyph"
-
-
 
             int tex_coord_left = increment_x - alphabet_padding;
             int tex_coord_right = increment_x + glyph->bitmap.width + alphabet_padding;
