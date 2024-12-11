@@ -30,52 +30,6 @@ uniform sampler2D alphabet_texture;
 // uniform bool isText;
 uniform bool isFog;
 
-float basicFog() {
-    vec3 cameraProj = vec3(cameraPos);
-    cameraProj.y = 0.0;
-
-    vec3 pixelProj = worldPosition;
-    pixelProj.y = 0.0;
-
-    float fogEnd = 60.0;
-    float deltaD = length(cameraProj - pixelProj) / fogEnd;
-
-    float deltaY = 0.0f;
-    float density = 0.0f;
-
-    float fogTop = 0.015;
-
-    float heightFactor = 0.0;
-    heightFactor = exp(-pow(worldPosition.y - fogTop, 2.0) * 10.0);
-
-    if (cameraPos.y > fogTop) {
-        if (worldPosition.y < fogTop) {
-            deltaY = (fogTop - worldPosition.y) / fogTop;
-            density = deltaY * deltaY * 0.5 * heightFactor;
-        }
-    } else {
-        if (worldPosition.y < fogTop) {
-            deltaY = abs(cameraPos.y - worldPosition.y) / fogTop;
-            float deltaCamera = (fogTop - cameraPos.y) / fogTop;
-            float densityCamera = deltaCamera * deltaCamera * 0.5;
-            float deltaPixel = (fogTop - worldPosition.y) / fogTop;
-            float densityPixel = deltaPixel * deltaPixel * 0.5;
-            density = abs(densityCamera - densityPixel) * heightFactor;
-        } else {
-            deltaY = (fogTop - cameraPos.y) / fogTop;
-            density = deltaY * deltaY * 0.5 * heightFactor;
-        }
-    }
-
-    float fogDensity = 0.0;
-
-    if (deltaY != 0) {
-        fogDensity = (sqrt(1.0 + ((deltaD / deltaY) * (deltaD / deltaY)))) * density;
-    }
-
-    return exp(-fogDensity);
-}
-
 void main() {
     float texture_value = texture(alphabet_texture, texture_coordinates).r;
 
@@ -121,11 +75,15 @@ void main() {
                 }
             fragColor.a = 1.0;
         } else {
-            float fog = basicFog();
-            fragColor = vec4(0.41, 0.45, 0.5, 1.0);
-            vec3 fogColor = vec3(0.53, 0.58, 0.64);
-            fragColor = mix(fragColor, vec4(fogColor, 1.0), fog);
-            fragColor.a = mix(0.1, 1.0, fog);
+            vec4 darkFogColor = vec4(0.41, 0.45, 0.5, 1.0);
+            vec4 fogColor = vec4(0.53, 0.58, 0.64, 1.0);
+            float fogTop = 0.06;
+            float fogBottom = 0;
+
+            float heightFactor = 0.0;
+            heightFactor = clamp(smoothstep(fogBottom, fogTop, worldPosition.y), 0.0, 1.0);
+            fragColor = mix(darkFogColor, fogColor, heightFactor);
+            fragColor.a = mix(0.7, 1.0, heightFactor);
         }
     } else {
         // fragColor = vec4(0, 0, 0, 1);

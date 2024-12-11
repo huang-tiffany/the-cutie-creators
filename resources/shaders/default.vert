@@ -9,6 +9,7 @@ uniform mat4 model;
 
 uniform mat4 transp_inv_model_matrix;
 uniform mat4 mvp_matrix;
+uniform mat4 fog_matrix;
 
 out vec2 texture_coordinates;
 out vec3 texcoords_anim;
@@ -21,7 +22,11 @@ void main(void)
     // if (!isText) { // uncomment to visualize text. don't forget to draw it in realtime.cpp
     worldPosition = vec3(model * objectPosition);
     worldNormal = vec3(transp_inv_model_matrix * vec4(normalize(objectNormal), 0));
-    gl_Position = mvp_matrix * objectPosition;
+    if (fog_matrix == mat4(0.f)) {
+        gl_Position = mvp_matrix * objectPosition;
+    } else {
+        gl_Position = fog_matrix * objectPosition;
+    }
     texture_coordinates = vec2(worldPosition[0] / float(alphabet_texture_width / 100.f) + 0.5, worldPosition[2] / float(alphabet_texture_height / 100.f) + 0.5); // Same as using z and w... i.e. vertex.zw
     // } else {
     //     gl_Position = vec4(objectPosition.x/2, objectPosition.y, 0.0, 1.0);

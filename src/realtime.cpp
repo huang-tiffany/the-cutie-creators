@@ -183,6 +183,8 @@ void Realtime::paintGL() {
 
     m_text->draw_messages(m_text->messages.size() - 1);
 
+    glm::mat4 fogMatrix(0.f);
+
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
@@ -205,6 +207,7 @@ void Realtime::paintGL() {
         m_mvp = m_proj * m_view * m_text_model * shape.ctm;
 
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp_matrix"), 1, GL_FALSE, &m_mvp[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "fog_matrix"), 1, GL_FALSE, &fogMatrix[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "transp_inv_model_matrix"), 1, GL_FALSE, &shape.transpInvCtm[0][0]);
 
         glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
@@ -234,6 +237,13 @@ void Realtime::paintGL() {
 
     glBindVertexArray(m_vao_fog);
     glUseProgram(m_shader);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_latest_message.alphabet_texture_width);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_latest_message.alphabet_texture_height);
+    glm::mat4 identityMatrix(1.0f);
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &identityMatrix[0][0]);
+    fogMatrix = m_proj * m_view * m_text_model * identityMatrix;
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "fog_matrix"), 1, GL_FALSE, &fogMatrix[0][0]);
     glUniform1i(glGetUniformLocation(m_shader, "isFog"), 1);
     int res = fog.getResolution();
     glPolygonMode(GL_FRONT_AND_BACK, fog.m_wireshade? GL_LINE : GL_FILL);

@@ -25,6 +25,13 @@ Fog::~Fog()
     m_randVecLookup.clear();
 }
 
+void addPointToVector(glm::vec4 point, std::vector<float>& vector) {
+    vector.push_back(point.x);
+    vector.push_back(point.y);
+    vector.push_back(point.z);
+    vector.push_back(point.w);
+}
+
 void addPointToVector(glm::vec3 point, std::vector<float>& vector) {
     vector.push_back(point.x);
     vector.push_back(point.y);
@@ -53,22 +60,22 @@ std::vector<float> Fog::generateFog() {
             glm::vec3 n3 = getNormal(x2,y2);
             glm::vec3 n4 = getNormal(x1,y2);
 
-            addPointToVector(p1, verts);
+            addPointToVector(glm::vec4(p1, 1.f), verts);
             addPointToVector(n1, verts);
 
-            addPointToVector(p2, verts);
+            addPointToVector(glm::vec4(p2, 1.f), verts);
             addPointToVector(n2, verts);
 
-            addPointToVector(p3, verts);
+            addPointToVector(glm::vec4(p3, 1.f), verts);
             addPointToVector(n3, verts);
 
-            addPointToVector(p1, verts);
+            addPointToVector(glm::vec4(p1, 1.f), verts);
             addPointToVector(n1, verts);
 
-            addPointToVector(p3, verts);
+            addPointToVector(glm::vec4(p3, 1.f), verts);
             addPointToVector(n3, verts);
 
-            addPointToVector(p4, verts);
+            addPointToVector(glm::vec4(p4, 1.f), verts);
             addPointToVector(n4, verts);
         }
     }
@@ -87,17 +94,19 @@ glm::vec3 Fog::getPosition(int row, int col) {
     float stretch = 60.f;
 
     float x = stretch * row / m_resolution;
-    float y = stretch * col / m_resolution;
+    float z = stretch * col / m_resolution;
 
     float originalX = x;
-    float originalY = y;
+    float originalZ = z;
 
     x -= pixelOffset;
-    y -= pixelOffset;
+    z -= pixelOffset;
 
-    float z = getHeight((originalX - pixelOffset) / (stretch - 40.f), (originalY - pixelOffset) / (stretch - 40.f)) - .5f;
+    float y = getHeight((originalX - pixelOffset) / (0.9f), (originalZ - pixelOffset) / (0.9f));
+    y *= 0.2f;
+    y += 0.03f;
 
-    return glm::vec3(x, z, y);
+    return glm::vec3(x, y, z);
 }
 
 float interpolate(float A, float B, float alpha) {
@@ -111,6 +120,7 @@ float Fog::getHeight(float x, float y) {
     z += computePerlin(x * 8, y * 8) / 8;
     z += computePerlin(x * 8, y * 8) / 8;
     z += computePerlin(x * 16, y * 16) / 16;
+    z += computePerlin(x * 32, y * 32) / 32;
 
     return z;
 }
