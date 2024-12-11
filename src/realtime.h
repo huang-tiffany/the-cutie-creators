@@ -15,10 +15,7 @@
 #include <QTimer>
 #include <iostream>
 #include "realtimescene.h"
-#include "shapes/sphere.h"
 #include "shapes/cube.h"
-#include "shapes/cone.h"
-#include "shapes/cylinder.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "text_fonts_glyphs.h"
@@ -80,24 +77,22 @@ private:
     GLuint m_vao_cylinder;
     std::vector<std::vector<float>> m_shapesData;
 
-    Sphere* sphere = new Sphere();
     Cube* cube = new Cube();
-    Cone* cone = new Cone();
-    Cylinder* cylinder = new Cylinder();
 
-    glm::mat4 m_model = glm::mat4(1);
+    glm::mat4 m_mvp = glm::mat4(1);
+    glm::mat4 m_text_model = glm::mat4(1);
     glm::mat4 m_view  = glm::mat4(1);
     glm::mat4 m_proj  = glm::mat4(1);
 
-    glm::vec4 m_lightPos[8];
-    glm::vec4 m_lightDir[8];
-    glm::vec4 m_lightColors[8];
-    int m_lightType[8];
-    float m_a[8];
-    float m_b[8];
-    float m_c[8];
-    float m_angle[8];
-    float m_penumbra[8];
+    glm::vec4 m_lightPos[4];
+    glm::vec4 m_lightDir[4];
+    glm::vec4 m_lightColors[4];
+    int m_lightType[4];
+    float m_a[4];
+    float m_b[4];
+    float m_c[4];
+    float m_angle[4];
+    float m_penumbra[4];
     int m_numLights;
 
     GLuint m_defaultFBO;
@@ -114,6 +109,8 @@ private:
 
     FT_Library m_free_type;
     Text* m_text;
+    Text::Message_Parent m_latest_message;
+    int m_text_size = 120;
 
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 

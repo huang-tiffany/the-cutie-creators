@@ -8,7 +8,7 @@
 #include "glm/gtc/constants.hpp"
 #include "glm/gtx/transform.hpp"
 #include "utils/shaderloader.h"
-#include "utils/sceneparser.h"
+// #include "utils/sceneparser.h"
 
 // ================== Project 5: Lights, Camera
 
@@ -35,14 +35,8 @@ void Realtime::finish() {
     this->makeCurrent();
 
     // Students: anything requiring OpenGL calls when the program exits should be done here
-    glDeleteBuffers(1, &m_vbo_sphere);
     glDeleteBuffers(1, &m_vbo_cube);
-    glDeleteBuffers(1, &m_vbo_cone);
-    glDeleteBuffers(1, &m_vbo_cylinder);
-    glDeleteBuffers(1, &m_vao_sphere);
     glDeleteBuffers(1, &m_vao_cube);
-    glDeleteBuffers(1, &m_vao_cone);
-    glDeleteBuffers(1, &m_vao_cylinder);
     glDeleteProgram(m_shader);
     this->doneCurrent();
 
@@ -56,6 +50,7 @@ void Realtime::finish() {
     FT_Done_Face(m_text->face);
     FT_Done_FreeType(m_free_type);
     free(m_text);
+    free(cube);
     glDeleteProgram(m_shader);
 
     exit(EXIT_SUCCESS); // Function call: exit() is a C/C++ function that performs various tasks to help clean up resources.
@@ -110,17 +105,11 @@ void Realtime::initializeGL() {
     m_shader = ShaderLoader::createShaderProgram(":/resources/shaders/default.vert", ":/resources/shaders/default.frag");
     m_texture_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
 
-    sphere->updateParams(5, 5);
-    cube->updateParams(5);
-    cone->updateParams(5, 5);
-    cylinder->updateParams(5, 5);
+    cube->updateParams(1);
 
-    setUpShapeData(m_vbo_sphere, m_vao_sphere, sphere->generateShape());
     setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
-    setUpShapeData(m_vbo_cone, m_vao_cone, cone->generateShape());
-    setUpShapeData(m_vbo_cylinder, m_vao_cylinder, cylinder->generateShape());
 
-    m_model = rotate(m_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
+    m_text_model = rotate(m_text_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
 
     FT_Error error_code = FT_Init_FreeType(&m_free_type);
     if (error_code)
@@ -134,7 +123,8 @@ void Realtime::initializeGL() {
     m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
     std::string typefaceFilepath = settings.typeface;
     typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 120, false);
+    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
+    m_latest_message = m_text->messages[m_text->messages.size() - 1];
 
     glActiveTexture(GL_TEXTURE0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -181,9 +171,6 @@ void Realtime::initializeGL() {
     setUpScene();
 }
 
-
-
-
 void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -201,32 +188,37 @@ void Realtime::paintGL() {
 
         glUseProgram(m_shader);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
-        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
-        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_latest_message.alphabet_texture_width);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_latest_message.alphabet_texture_height);
 
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "text_model"), 1, GL_FALSE, &m_model[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "text_model"), 1, GL_FALSE, &m_text_model[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "view"), 1, GL_FALSE, &m_view[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "proj"), 1, GL_FALSE, &m_proj[0][0]);
+
+        m_mvp = m_proj * m_view * m_text_model * shape.ctm;
+
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp_matrix"), 1, GL_FALSE, &m_mvp[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "transp_inv_model_matrix"), 1, GL_FALSE, &shape.transpInvCtm[0][0]);
+
         glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
         glUniform1f(glGetUniformLocation(m_shader, "kd"), m_data.globalData.kd);
         glUniform1f(glGetUniformLocation(m_shader, "ks"), m_data.globalData.ks);
-        glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 8, &m_lightPos[0][0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 8, &m_lightDir[0][0]);
-        glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 8, &m_lightColors[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightPos"), 4, &m_lightPos[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightDir"), 4, &m_lightDir[0][0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "lightColors"), 4, &m_lightColors[0][0]);
         glUniform4fv(glGetUniformLocation(m_shader, "cAmbient"), 1, &cAmbient[0]);
         glUniform4fv(glGetUniformLocation(m_shader, "cDiffuse"), 1, &cDiffuse[0]);
         glUniform4fv(glGetUniformLocation(m_shader, "cSpecular"), 1, &cSpecular[0]);
-        glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 8, &m_lightType[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "a"), 8, &m_a[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "b"), 8, &m_b[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "c"), 8, &m_c[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "angle"), 8, &m_angle[0]);
-        glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 8, &m_penumbra[0]);
+        glUniform1iv(glGetUniformLocation(m_shader, "lightType"), 4, &m_lightType[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "a"), 4, &m_a[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "b"), 4, &m_b[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "c"), 4, &m_c[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "angle"), 4, &m_angle[0]);
+        glUniform1fv(glGetUniformLocation(m_shader, "penumbra"), 4, &m_penumbra[0]);
         glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
-        glUniform1i(glGetUniformLocation(m_shader, "isText"), false);
-        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &(glm::inverse(m_camera.getViewMatrix()) * glm::vec4(0.f, 0.f, 0.f, 1.f))[0]);
+        glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &m_data.cameraData.pos[0]);
 
         glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
@@ -299,7 +291,6 @@ void Realtime::setUpScene() {
     m_data.globalData.ks = 0.5;
     m_data.globalData.kt = 0.5;
 
-
     glm::vec4 dir = glm::vec4(-3.f, -2.f, -1.f, 0.f);
     SceneLightData lightData;
     lightData.id = 1;
@@ -312,6 +303,7 @@ void Realtime::setUpScene() {
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
     m_camera = scene.getCamera();
+    m_view = m_camera.getViewMatrix();
 
     m_numLights = m_data.lights.size();
     for (int i = 0; i < m_numLights; i++) {
@@ -356,8 +348,8 @@ void Realtime::setUpScene() {
 void Realtime::generateCity() {
     m_data.shapes.clear();
 
-    int gridSizeX = m_text->messages[m_text->messages.size() - 1].alphabet_texture_width / 10.f;
-    int gridSizeZ = m_text->messages[m_text->messages.size() - 1].alphabet_texture_height / 10.f;
+    int gridSizeX = m_latest_message.alphabet_texture_width / 10.f;
+    int gridSizeZ = m_latest_message.alphabet_texture_height / 10.f;
     float gridUpperBoundaryX = gridSizeX / 10.f;
     float gridUpperBoundaryZ = gridSizeZ / 10.f;
     int streetDensityX = gridSizeX / (gridSizeX * (settings.streetDensityX / 100.f));
@@ -380,6 +372,7 @@ void Realtime::generateCity() {
 
                 RenderShapeData shape;
                 shape.ctm = ctm;
+                shape.transpInvCtm = glm::transpose(glm::inverse(ctm));
                 shape.primitive = primitive;
                 m_data.shapes.push_back(shape);
 
@@ -399,6 +392,7 @@ void Realtime::generateCity() {
                         ctm2 *= glm::scale(glm::mat4(1.0f), glm::vec3(r1 / 3.f, r2 / 3.f, r3 / 3.f));
                         RenderShapeData shape2;
                         shape2.ctm = ctm2;
+                        shape2.transpInvCtm = glm::transpose(glm::inverse(ctm));
                         shape2.primitive = primitive2;
                         m_data.shapes.push_back(shape2);
                     }
@@ -415,9 +409,10 @@ void Realtime::settingsChanged() {
         m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
         std::string typefaceFilepath = settings.typeface;
         typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 120, false);
+        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
+        m_latest_message = m_text->messages[m_text->messages.size() - 1];
 
-        glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+        glm::vec2 dims = m_text->calculate_message_image_size(m_latest_message);
         glViewport(0, 0, dims[0], dims[1]);
         makeFBO();
         generateCity();
@@ -430,7 +425,7 @@ void Realtime::settingsChanged() {
 void Realtime::makeFBO(){
     glGenTextures(1, &m_fbo_texture);
     glActiveTexture(GL_TEXTURE0);
-    glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+    glm::vec2 dims = m_text->calculate_message_image_size(m_latest_message);
     glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dims[0], dims[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -497,8 +492,8 @@ void Realtime::mouseMoveEvent(QMouseEvent *event) {
         float xChange = deltaX * 0.01f;
         float yChange = deltaY * -0.01f;
 
-        m_model = rotate(m_model, xChange, glm::vec3(0.0f, 0.f, 1.0f));
-        m_model = rotate(m_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
+        m_text_model = rotate(m_text_model, xChange, glm::vec3(0.0f, 0.f, 1.0f));
+        m_text_model = rotate(m_text_model, yChange, glm::vec3(1.0f, 0.0f, 0.0f));
 
         update(); // asks for a PaintGL() call to occur
     }
@@ -533,6 +528,7 @@ void Realtime::timerEvent(QTimerEvent *event) {
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
     m_camera = scene.getCamera();
+    m_view = m_camera.getViewMatrix();
 
     update(); // asks for a PaintGL() call to occur
 }
