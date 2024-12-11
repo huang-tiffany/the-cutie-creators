@@ -131,7 +131,7 @@ void Realtime::initializeGL() {
     }
 
     // qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,.;:'\"?![]-_+={}|/
-    m_text = new Text(m_free_type, size().width(), size().height(), settings.text); // Declare a new text object, passing in your chosen alphabet.
+    m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
     std::string typefaceFilepath = settings.typeface;
     typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
     m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 130, false);
@@ -181,10 +181,22 @@ void Realtime::initializeGL() {
     setUpScene();
 }
 
+
+
+
 void Realtime::paintGL() {
+    glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+    glViewport(0, 0, dims[0], dims[1]);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    glViewport(0, 0, m_fbo_width, m_fbo_height);
-    glClearColor(0,0,0,1);
+    // glm::vec4 topLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].top_left_tr1;
+    // glm::vec4 topRight = m_text->messages[m_text->messages.size() - 1].characters_quads[m_text->messages[m_text->messages.size() - 1].characters_quads.size() - 1].top_right_tr2;
+    // glm::vec4 bottomLeft = m_text->messages[m_text->messages.size() - 1].characters_quads[0].bottom_left_tr1;
+
+    // int width = topRight.x - topLeft.x;
+    // int height = bottomLeft.y - topLeft.y;
+
+
+    glClearColor(1,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glUseProgram(m_shader);
@@ -193,7 +205,8 @@ void Realtime::paintGL() {
     m_text->draw_messages(m_text->messages.size() - 1);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-    glViewport(0, 0, m_screen_width, m_screen_height);
+    glViewport(0, 0, m_fbo_width, m_fbo_height);
+    glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     paintTexture(m_fbo_texture, settings.perPixelFilter, settings.kernelBasedFilter);
     glUseProgram(0);
@@ -204,34 +217,37 @@ void Realtime::paintGL() {
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
-        switch (shape.primitive.type) {
-        case PrimitiveType::PRIMITIVE_SPHERE:
-            glBindVertexArray(m_vao_sphere);
-            break;
-        case PrimitiveType::PRIMITIVE_CUBE:
-            glBindVertexArray(m_vao_cube);
-            break;
-        case PrimitiveType::PRIMITIVE_CONE:
-            glBindVertexArray(m_vao_cone);
-            break;
-        case PrimitiveType::PRIMITIVE_CYLINDER:
-            glBindVertexArray(m_vao_cylinder);
-            break;
-        case PrimitiveType::PRIMITIVE_MESH:
-            break;
-        }
+        // switch (shape.primitive.type) {
+        // case PrimitiveType::PRIMITIVE_SPHERE:
+        //     glBindVertexArray(m_vao_sphere);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CUBE:
+        //     glBindVertexArray(m_vao_cube);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CONE:
+        //     glBindVertexArray(m_vao_cone);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_CYLINDER:
+        //     glBindVertexArray(m_vao_cylinder);
+        //     break;
+        // case PrimitiveType::PRIMITIVE_MESH:
+        //     break;
+        // }
 
         // glm::vec4 cAmbient(shape.primitive.material.cAmbient[0], shape.primitive.material.cAmbient[1], shape.primitive.material.cAmbient[2], shape.primitive.material.cAmbient[3]);
         // glm::vec4 cDiffuse(shape.primitive.material.cDiffuse[0], shape.primitive.material.cDiffuse[1], shape.primitive.material.cDiffuse[2], shape.primitive.material.cDiffuse[3]);
         // glm::vec4 cSpecular(shape.primitive.material.cSpecular[0], shape.primitive.material.cSpecular[1], shape.primitive.material.cSpecular[2], shape.primitive.material.cSpecular[3]);
 
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
+
         glm::vec4 cAmbient(1, 1, 1, 1);
         glm::vec4 cDiffuse(1, 1, 1, 1);
         glm::vec4 cSpecular(1, 1, 1, 1);
 
         glUseProgram(m_shader);
-        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+        glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 0);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_width);
         glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_text->messages[m_text->messages.size() - 1].alphabet_texture_height);
 
@@ -281,9 +297,6 @@ void Realtime::paintGL() {
 
         glBindVertexArray(0);
     }
-
-
-
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -463,14 +476,15 @@ void Realtime::generateCity() {
 
 void Realtime::settingsChanged() {
     if (initFinish) {
-
         free(m_text);
-
-        m_text = new Text(m_free_type, size().width(), size().height(), settings.text); // Declare a new text object, passing in your chosen alphabet.
+        m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
         std::string typefaceFilepath = settings.typeface;
         typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
         m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", 130, false);
 
+        glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
+        glViewport(0, 0, dims[0], dims[1]);
+        makeFBO();
         generateCity();
     }
     update(); // asks for a PaintGL() call to occur
@@ -481,15 +495,17 @@ void Realtime::settingsChanged() {
 void Realtime::makeFBO(){
     glGenTextures(1, &m_fbo_texture);
     glActiveTexture(GL_TEXTURE0);
+    glm::vec2 dims = m_text->calculate_message_image_size(m_text->messages[m_text->messages.size() - 1]);
     glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fbo_width, m_fbo_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dims[0], dims[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenRenderbuffers(1, &m_fbo_renderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_fbo_renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_fbo_width, m_fbo_height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, dims[0], dims[1]);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     glGenFramebuffers(1, &m_fbo);

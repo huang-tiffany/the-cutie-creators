@@ -95,6 +95,80 @@ public:
         scale_pixels_y_to_OpenGL = 2.0f / window_height; // This makes the text display at the same correct pixel size, regardless of the window size.
     }
 
+    glm::vec2 calculate_message_image_size(Message_Parent& new_message)
+    {
+        glm::vec2 dims;
+        FT_Error error_code{};
+
+        int curr_row_width = 0;
+        int max_row_width = 0;
+        int number_of_rows = 1;
+        int character_count = 0;
+
+        new_message.tallest_font_height = 0;
+
+        for (unsigned i = 0; i < new_message.message_string.size(); i++)
+        {
+            error_code = FT_Load_Char(face, new_message.message_string[i], FT_LOAD_RENDER);
+            if (error_code)
+            {
+                std::cout << "\n\n   Error code: " << error_code << " --- " << "Could not load character: " << new_message.message_string[i];
+                int keep_console_open;
+                std::cin >> keep_console_open;
+            }
+            if ((signed)glyph->bitmap.rows > new_message.tallest_font_height)
+                new_message.tallest_font_height = glyph->bitmap.rows;
+
+            curr_row_width += glyph->bitmap.width + alphabet_padding * 2;
+
+            ++character_count;
+            if (character_count == character_row_limit)
+            {
+                character_count = 0;
+                ++number_of_rows;
+
+                if (curr_row_width > max_row_width)
+                    max_row_width = curr_row_width;
+
+                curr_row_width = 0;
+            }
+            dims[0] = (curr_row_width > max_row_width) ? curr_row_width : max_row_width;
+        }
+        dims[1] = number_of_rows * (new_message.tallest_font_height + alphabet_padding * 2);
+
+        return dims;
+    }
+
+    void format_message_texture_image(Message_Parent& new_message)
+    {
+        glActiveTexture(GL_TEXTURE31);
+        glBindTexture(GL_TEXTURE_2D, new_message.alphabet_texture);
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        // Initialise empty data: https://stackoverflow.com/questions/7195130/how-to-efficiently-initialize-texture-with-zeroes
+        std::vector<GLubyte> empty_data(new_message.alphabet_texture_width * new_message.alphabet_texture_height, 0); // GL_RED = 8 bits = 1 byte.
+
+        //  https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml
+        // "Each element is a single red component. OpenGL converts it to floating point and assembles it to RGBA, by attaching 0 for green and blue, and 1 for alpha. Each component is clamped to the range [0, 1]"
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, new_message.alphabet_texture_width, new_message.alphabet_texture_height, 0, GL_RED, GL_UNSIGNED_BYTE, &empty_data[0]);
+
+        int character_count = 0;
+        int increment_x = alphabet_padding;
+        int increment_y = alphabet_padding;
+
+        new_message.relative_distance = new_message.tallest_font_height; // Set relative distance to initial value.
+
+        for (unsigned i = 0; i < alphabet_string.size(); ++i)
+        {
+            FT_Load_Char(face, alphabet_string[i], FT_LOAD_RENDER); // "glyph" as used below... is shorthand for "face->glyph"
+
+            int tex_coord_left = increment_x - alphabet_padding;
+            glTexSubImage2D(GL_TEXTURE_2D, 0, increment_x, increment_y, glyph->bitmap.width + glyph->bitmap_left, glyph->bitmap.rows + glyph->bitmap_top, GL_RED, GL_UNSIGNED_BYTE, glyph->bitmap.buffer); // Apply 1 character at a time to the texture.
+        }
+    }
+
+
     void create_text_message(std::string message, int text_start_x, int text_start_y, std::string font_path, int font_size, bool dynamic_static)
     {
         int alphabet_detected = -1;

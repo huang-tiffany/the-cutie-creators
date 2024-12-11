@@ -28,7 +28,7 @@ void main(void)
     } else {
         // Enable this line for 2D window-positioned text
         // -------------------------------------------------------------
-        gl_Position = vec4(objectPosition.xy, 0.0, 1.0);
+        gl_Position = vec4(objectPosition.x/2, objectPosition.y, 0.0, 1.0);
         texture_coordinates = vec2(objectPosition[2], objectPosition[3]); // Same as using z and w... i.e. vertex.zw
     }
 
