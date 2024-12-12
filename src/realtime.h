@@ -117,6 +117,12 @@ private:
     Text::Message_Parent m_latest_message;
     int m_text_size = 120;
 
+    float m_prev_building_height = 1;
+    float m_prev_building_irregularity = 1;
+    float m_prev_street_density_x = 1;
+    float m_prev_street_density_z = 1;
+    float m_prev_fog_height = 1.0f;
+
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 
         int newStride = int(stride / 4);

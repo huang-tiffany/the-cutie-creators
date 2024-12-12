@@ -26,6 +26,7 @@ private:
     void connectStreetDensityX();
     void connectStreetDensityZ();
     void connectFogDensity();
+    void connectFogHeight();
     void connectSaveImage();
     void connectText();
 
@@ -37,6 +38,7 @@ private:
     QSlider *streetDensityXSlider;
     QSlider *streetDensityZSlider;
     QSlider *fogDensitySlider;
+    QSlider *fogHeightSlider;
     QLineEdit *textBox;
     QComboBox *typefaceBox;
 
@@ -45,6 +47,7 @@ private:
     QDoubleSpinBox *streetDensityXBox;
     QDoubleSpinBox *streetDensityZBox;
     QDoubleSpinBox *fogDensityBox;
+    QDoubleSpinBox *fogHeightBox;
 
 private slots:
     void onSaveImage();
@@ -53,6 +56,7 @@ private slots:
     void onValChangeStreetDensityXSlider(int newValue);
     void onValChangeStreetDensityZSlider(int newValue);
     void onValChangeFogDensitySlider(int newValue);
+    void onValChangeFogHeightSlider(int newValue);
     void onValChangeTextBox(QString newValue);
     void onValChangeTypefaceBox(QString newValue);
 
@@ -61,4 +65,5 @@ private slots:
     void onValChangeStreetDensityXBox(double newValue);
     void onValChangeStreetDensityZBox(double newValue);
     void onValChangeFogDensityBox(double newValue);
+    void onValChangeFogHeightBox(double newValue);
 };

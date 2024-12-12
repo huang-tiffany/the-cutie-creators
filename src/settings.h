@@ -19,7 +19,8 @@ struct Settings {
     int streetDensityX = 1;
     int streetDensityZ = 1;
 
-    float fogDensity = 0.75;
+    float fogDensity = 0.75f;
+    float fogHeight = 1.f;
 };
 
 

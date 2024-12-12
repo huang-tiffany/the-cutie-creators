@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include "glm/glm.hpp"
+#include "settings.h"
 
 Fog::Fog()
 {
@@ -103,7 +104,7 @@ glm::vec3 Fog::getPosition(int row, int col) {
     z -= pixelOffset;
 
     float y = getHeight((originalX - pixelOffset) / (0.9f), (originalZ - pixelOffset) / (0.9f));
-    y *= 0.2f;
+    y *= 0.2f * settings.fogHeight;
     y += 0.03f;
 
     return glm::vec3(x, y, z);

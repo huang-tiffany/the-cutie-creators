@@ -431,17 +431,31 @@ void Realtime::generateCity() {
 
 void Realtime::settingsChanged() {
     if (initFinish) {
-        free(m_text);
-        m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
-        std::string typefaceFilepath = settings.typeface;
-        typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
-        m_latest_message = m_text->messages[m_text->messages.size() - 1];
+        if (settings.fogHeight != m_prev_fog_height) {
+            glBindBuffer(GL_ARRAY_BUFFER, m_vbo_fog);
+            std::vector<float> newFog = fog.generateFog();
+            glBufferData(GL_ARRAY_BUFFER, newFog.size() * sizeof(GLfloat), newFog.data(), GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER,0);
+            m_prev_fog_height = settings.fogHeight;
+        } else if (settings.buildingHeight != m_prev_building_height || settings.buildingIrregularity != m_prev_building_irregularity ||
+                   settings.streetDensityX != m_prev_street_density_x || settings.streetDensityZ != m_prev_street_density_z) {
+            free(m_text);
+            m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
+            std::string typefaceFilepath = settings.typeface;
+            typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+            m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
+            m_latest_message = m_text->messages[m_text->messages.size() - 1];
 
-        glm::vec2 dims = m_text->calculate_message_image_size(m_latest_message);
-        glViewport(0, 0, dims[0], dims[1]);
-        makeFBO();
-        generateCity();
+            glm::vec2 dims = m_text->calculate_message_image_size(m_latest_message);
+            glViewport(0, 0, dims[0], dims[1]);
+            makeFBO();
+            generateCity();
+
+            settings.buildingHeight = m_prev_building_height;
+            settings.buildingIrregularity = m_prev_building_irregularity;
+            settings.streetDensityX = m_prev_street_density_x;
+            settings.streetDensityZ = m_prev_street_density_z;
+        }
     }
     update(); // asks for a PaintGL() call to occur
 }
