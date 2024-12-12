@@ -29,6 +29,9 @@ public:
     void setUpScene();
     void setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<float> shapeData);
     void settingsChanged();
+    void settingsChangedFog();
+    void settingsChangedCity();
+    void settingsChangedText();
     void saveViewportImage(std::string filePath);
 
 public slots:
@@ -47,6 +50,7 @@ private:
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
     void generateCity();
+    void generateFog();
     void makeFBO();
     void paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture);
     GLuint createWorleyPointsBuffer(int numCellsPerAxis, std::string bufferName);
@@ -122,6 +126,9 @@ private:
     float m_prev_street_density_x = 1;
     float m_prev_street_density_z = 1;
     float m_prev_fog_height = 1.0f;
+    bool m_prev_solid_fog = true;
+    std::string m_prev_text_message = "";
+    std::string m_prev_typeface = "";
 
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 

@@ -185,6 +185,7 @@ void Realtime::paintGL() {
 
     glm::mat4 fogMatrix(0.f);
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
@@ -247,7 +248,10 @@ void Realtime::paintGL() {
     glUniform1i(glGetUniformLocation(m_shader, "isFog"), 1);
     glUniform1f(glGetUniformLocation(m_shader, "fogDensity"), settings.fogDensity);
     int res = fog.getResolution();
-    glPolygonMode(GL_FRONT_AND_BACK, fog.m_wireshade? GL_LINE : GL_FILL);
+    if (!settings.solidFog) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        glPointSize(4);
+    }
     glDrawArrays(GL_TRIANGLES, 0, res * res * 6);
     glBindVertexArray(0);
 }
@@ -325,7 +329,9 @@ void Realtime::setUpScene() {
     lightData.dir = dir;
     m_data.lights.push_back(lightData);
 
-    generateCity();
+    settingsChangedFog();
+    settingsChangedCity();
+    settingsChangedText();
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
     m_camera = scene.getCamera();
@@ -429,32 +435,50 @@ void Realtime::generateCity() {
     }
 }
 
+void Realtime::generateFog() {
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo_fog);
+    std::vector<float> newFog = fog.generateFog();
+    glBufferData(GL_ARRAY_BUFFER, newFog.size() * sizeof(GLfloat), newFog.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+}
+
+void Realtime::settingsChangedFog() {
+    generateFog();
+    m_prev_fog_height = settings.fogHeight;
+    m_prev_solid_fog = settings.solidFog;
+}
+
+void Realtime::settingsChangedCity() {
+    makeFBO();
+    generateCity();
+
+    m_prev_building_height = settings.buildingHeight;
+    m_prev_building_irregularity = settings.buildingIrregularity;
+    m_prev_street_density_x = settings.streetDensityX;
+    m_prev_street_density_z = settings.streetDensityZ;
+}
+
+void Realtime::settingsChangedText() {
+    free(m_text);
+    m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
+    std::string typefaceFilepath = settings.typeface;
+    typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
+    m_latest_message = m_text->messages[m_text->messages.size() - 1];
+    m_prev_text_message = settings.text;
+    m_prev_typeface = settings.typeface;
+    generateCity();
+}
+
 void Realtime::settingsChanged() {
     if (initFinish) {
-        if (settings.fogHeight != m_prev_fog_height) {
-            glBindBuffer(GL_ARRAY_BUFFER, m_vbo_fog);
-            std::vector<float> newFog = fog.generateFog();
-            glBufferData(GL_ARRAY_BUFFER, newFog.size() * sizeof(GLfloat), newFog.data(), GL_STATIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER,0);
-            m_prev_fog_height = settings.fogHeight;
+        if (settings.fogHeight != m_prev_fog_height || settings.solidFog != m_prev_solid_fog) {
+            settingsChangedFog();
         } else if (settings.buildingHeight != m_prev_building_height || settings.buildingIrregularity != m_prev_building_irregularity ||
                    settings.streetDensityX != m_prev_street_density_x || settings.streetDensityZ != m_prev_street_density_z) {
-            free(m_text);
-            m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
-            std::string typefaceFilepath = settings.typeface;
-            typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-            m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
-            m_latest_message = m_text->messages[m_text->messages.size() - 1];
-
-            glm::vec2 dims = m_text->calculate_message_image_size(m_latest_message);
-            glViewport(0, 0, dims[0], dims[1]);
-            makeFBO();
-            generateCity();
-
-            settings.buildingHeight = m_prev_building_height;
-            settings.buildingIrregularity = m_prev_building_irregularity;
-            settings.streetDensityX = m_prev_street_density_x;
-            settings.streetDensityZ = m_prev_street_density_z;
+            settingsChangedCity();
+        } else if (settings.text.compare(m_prev_text_message) != 0 || settings.typeface.compare(m_prev_typeface) != 0) {
+            settingsChangedText();
         }
     }
     update(); // asks for a PaintGL() call to occur

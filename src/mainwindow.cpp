@@ -44,6 +44,8 @@ void MainWindow::initialize() {
     fogDensity_label->setText("Fog Density:");
     QLabel *fogHeight_label = new QLabel(); // Far plane label
     fogHeight_label->setText("Fog Height:");
+    QLabel *solidFog_label = new QLabel(); // Far plane label
+    solidFog_label->setText("Fog Display:");
     
     saveImage = new QPushButton();
     saveImage->setText(QStringLiteral("Save image"));
@@ -65,6 +67,8 @@ void MainWindow::initialize() {
     QHBoxLayout *lfogDensity = new QHBoxLayout();
     QGroupBox *fogHeightLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lfogHeight = new QHBoxLayout();
+    QGroupBox *solidFogLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lsolidFog = new QHBoxLayout();
 
 
     textBox = new QLineEdit();
@@ -145,10 +149,9 @@ void MainWindow::initialize() {
     fogHeightBox->setSingleStep(1.f);
     fogHeightBox->setValue(1.f);
 
-    ltext->addWidget(textBox);
-    ltypeface->addWidget(typefaceBox);
-    textLayout->setLayout(ltext);
-    typefaceLayout->setLayout(ltypeface);
+    solidFogBox = new QCheckBox();
+    solidFogBox->setText(QStringLiteral("Solid Fog"));
+    solidFogBox->setChecked(true);
 
     ltext->addWidget(textBox);
     ltypeface->addWidget(typefaceBox);
@@ -179,9 +182,12 @@ void MainWindow::initialize() {
     lfogHeight->addWidget(fogHeightBox);
     fogHeightLayout->setLayout(lfogHeight);
 
-    vLayout->addWidget(saveImage);
+    lsolidFog->addWidget(solidFogBox);
+    solidFogLayout->setLayout(lsolidFog);
 
-    vLayout->addWidget(text_label);
+    // vLayout->addWidget(saveImage);
+
+    // vLayout->addWidget(text_label);
     vLayout->addWidget(text_string_label);
     vLayout->addWidget(textLayout);
     vLayout->addWidget(typeface_label);
@@ -199,11 +205,13 @@ void MainWindow::initialize() {
     vLayout->addWidget(fogDensityLayout);
     vLayout->addWidget(fogHeight_label);
     vLayout->addWidget(fogHeightLayout);
+    vLayout->addWidget(solidFog_label);
+    vLayout->addWidget(solidFogLayout);
 
     connectUIElements();
 
     onValChangeTextBox("Hello World");
-    onValChangeTypefaceBox("Q");
+    onValChangeTypefaceBox("Rubik Mono One");
     onValChangeBuildingHeightBox(5.f);
     onValChangeBuildingIrregularityBox(2.f);
     onValChangeStreetDensityXBox(20.f);
@@ -218,7 +226,7 @@ void MainWindow::finish() {
 }
 
 void MainWindow::connectUIElements() {
-    connectSaveImage();
+    // connectSaveImage();
     connectText();
     connectBuildingHeight();
     connectBuildingIrregularity();
@@ -226,6 +234,7 @@ void MainWindow::connectUIElements() {
     connectStreetDensityZ();
     connectFogDensity();
     connectFogHeight();
+    connectSolidFog();
 }
 
 void MainWindow::connectSaveImage() {
@@ -271,6 +280,10 @@ void MainWindow::connectFogHeight() {
     connect(fogHeightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeFogHeightSlider);
     connect(fogHeightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeFogHeightBox);
+}
+
+void MainWindow::connectSolidFog() {
+    connect(solidFogBox, &QCheckBox::clicked,this, &MainWindow::onValChangeSolidFogBox);
 }
 
 void MainWindow::onSaveImage() {
@@ -387,5 +400,10 @@ void MainWindow::onValChangeFogHeightBox(double newValue) {
     fogHeightSlider->setValue(int(newValue * 100.f));
     //farBox->setValue(newValue);
     settings.fogHeight = fogHeightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeSolidFogBox() {
+    settings.solidFog = !settings.solidFog;
     realtime->settingsChanged();
 }

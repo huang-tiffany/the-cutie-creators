@@ -81,10 +81,13 @@ void main() {
             float fogTop = 0.06;
             float fogBottom = 0;
 
-            float heightFactor = 0.0;
-            heightFactor = clamp(smoothstep(fogBottom, fogTop, worldPosition.y), 0.0, 1.0);
+            float heightFactor = clamp(smoothstep(fogBottom, fogTop, worldPosition.y), 0.0, 1.0);
+            float alpha = mix(0.0, 1.0, heightFactor * fogDensity);
+            if (alpha < 0.25) {
+                discard;
+            }
             fragColor = mix(darkFogColor, fogColor, heightFactor);
-            fragColor.a = mix(0.0, 1.0, heightFactor * fogDensity);
+            fragColor.a = alpha;
         }
     } else {
         // fragColor = vec4(0, 0, 0, 1);

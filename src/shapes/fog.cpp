@@ -91,8 +91,15 @@ glm::vec2 Fog::sampleRandomVector(int row, int col)
 }
 
 glm::vec3 Fog::getPosition(int row, int col) {
-    float pixelOffset = 50.f;
-    float stretch = 60.f;
+    float pixelOffset = 50;
+    float stretch = 60;
+    if (!settings.solidFog) {
+        m_resolution = 512;
+        pixelOffset = arc4random_uniform(50.f);
+        stretch = arc4random_uniform(60.f);
+    } else {
+        m_resolution = 100;
+    }
 
     float x = stretch * row / m_resolution;
     float z = stretch * col / m_resolution;

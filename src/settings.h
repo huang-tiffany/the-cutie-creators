@@ -11,8 +11,7 @@ struct Settings {
     float farPlane = 100;
     std::string text;
     std::string typeface;
-    bool perPixelFilter = false;
-    bool kernelBasedFilter = false;
+    bool solidFog = true;
 
     int buildingHeight = 1;
     int buildingIrregularity = 1;
