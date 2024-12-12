@@ -19,6 +19,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "text_fonts_glyphs.h"
+#include "shapes/fog.h"
 
 class Realtime : public QOpenGLWidget
 {
@@ -28,6 +29,9 @@ public:
     void setUpScene();
     void setUpShapeData(GLuint& shape_vbo, GLuint& shape_vao, std::vector<float> shapeData);
     void settingsChanged();
+    void settingsChangedFog();
+    void settingsChangedCity();
+    void settingsChangedText();
     void saveViewportImage(std::string filePath);
 
 public slots:
@@ -46,8 +50,10 @@ private:
     void mouseMoveEvent(QMouseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
     void generateCity();
+    void generateFog();
     void makeFBO();
     void paintTexture(GLuint texture, bool togglePerPixelTexture, bool toggleKernelTexture);
+    GLuint createWorleyPointsBuffer(int numCellsPerAxis, std::string bufferName);
 
     // Tick Related Variables
     int m_timer;                                        // Stores timer which attempts to run ~60 times per second
@@ -71,13 +77,16 @@ private:
     GLuint m_vbo_cube;
     GLuint m_vbo_cone;
     GLuint m_vbo_cylinder;
+    GLuint m_vbo_fog;
     GLuint m_vao_sphere;
     GLuint m_vao_cube;
     GLuint m_vao_cone;
     GLuint m_vao_cylinder;
+    GLuint m_vao_fog;
     std::vector<std::vector<float>> m_shapesData;
 
     Cube* cube = new Cube();
+    Fog fog;
 
     glm::mat4 m_mvp = glm::mat4(1);
     glm::mat4 m_text_model = glm::mat4(1);
@@ -111,6 +120,15 @@ private:
     Text* m_text;
     Text::Message_Parent m_latest_message;
     int m_text_size = 120;
+
+    float m_prev_building_height = 1;
+    float m_prev_building_irregularity = 1;
+    float m_prev_street_density_x = 1;
+    float m_prev_street_density_z = 1;
+    float m_prev_fog_height = 1.0f;
+    bool m_prev_solid_fog = true;
+    std::string m_prev_text_message = "";
+    std::string m_prev_typeface = "";
 
     void verifyVAO(std::vector<GLfloat> &triangleData, GLuint index, GLsizei size, GLsizei stride, const void* offset) {
 

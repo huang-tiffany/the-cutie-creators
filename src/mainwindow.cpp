@@ -40,6 +40,12 @@ void MainWindow::initialize() {
     streetDensityX_label->setText("Horizontal Street Density:");
     QLabel *streetDensityZ_label = new QLabel(); // Far plane label
     streetDensityZ_label->setText("Vertical Street Density:");
+    QLabel *fogDensity_label = new QLabel(); // Far plane label
+    fogDensity_label->setText("Fog Density:");
+    QLabel *fogHeight_label = new QLabel(); // Far plane label
+    fogHeight_label->setText("Fog Height:");
+    QLabel *solidFog_label = new QLabel(); // Far plane label
+    solidFog_label->setText("Fog Display:");
     
     saveImage = new QPushButton();
     saveImage->setText(QStringLiteral("Save image"));
@@ -57,6 +63,13 @@ void MainWindow::initialize() {
     QHBoxLayout *lstreetDensityX = new QHBoxLayout();
     QGroupBox *streetDensityZLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lstreetDensityZ = new QHBoxLayout();
+    QGroupBox *fogDensityLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lfogDensity = new QHBoxLayout();
+    QGroupBox *fogHeightLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lfogHeight = new QHBoxLayout();
+    QGroupBox *solidFogLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lsolidFog = new QHBoxLayout();
+
 
     textBox = new QLineEdit();
     textBox->setText("Hello World");
@@ -112,6 +125,34 @@ void MainWindow::initialize() {
     streetDensityZBox->setSingleStep(1.f);
     streetDensityZBox->setValue(20.f);
 
+    fogDensitySlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    fogDensitySlider->setTickInterval(1);
+    fogDensitySlider->setMinimum(0);
+    fogDensitySlider->setMaximum(100);
+    fogDensitySlider->setValue(75);
+
+    fogDensityBox = new QDoubleSpinBox();
+    fogDensityBox->setMinimum(0.f);
+    fogDensityBox->setMaximum(1.f);
+    fogDensityBox->setSingleStep(0.01f);
+    fogDensityBox->setValue(0.75f);
+
+    fogHeightSlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    fogHeightSlider->setTickInterval(1);
+    fogHeightSlider->setMinimum(0);
+    fogHeightSlider->setMaximum(1000);
+    fogHeightSlider->setValue(100);
+
+    fogHeightBox = new QDoubleSpinBox();
+    fogHeightBox->setMinimum(0.f);
+    fogHeightBox->setMaximum(10.f);
+    fogHeightBox->setSingleStep(1.f);
+    fogHeightBox->setValue(1.f);
+
+    solidFogBox = new QCheckBox();
+    solidFogBox->setText(QStringLiteral("Solid Fog"));
+    solidFogBox->setChecked(true);
+
     ltext->addWidget(textBox);
     ltypeface->addWidget(typefaceBox);
     textLayout->setLayout(ltext);
@@ -133,9 +174,20 @@ void MainWindow::initialize() {
     lstreetDensityZ->addWidget(streetDensityZBox);
     streetDensityZLayout->setLayout(lstreetDensityZ);
 
-    vLayout->addWidget(saveImage);
+    lfogDensity->addWidget(fogDensitySlider);
+    lfogDensity->addWidget(fogDensityBox);
+    fogDensityLayout->setLayout(lfogDensity);
 
-    vLayout->addWidget(text_label);
+    lfogHeight->addWidget(fogHeightSlider);
+    lfogHeight->addWidget(fogHeightBox);
+    fogHeightLayout->setLayout(lfogHeight);
+
+    lsolidFog->addWidget(solidFogBox);
+    solidFogLayout->setLayout(lsolidFog);
+
+    // vLayout->addWidget(saveImage);
+
+    // vLayout->addWidget(text_label);
     vLayout->addWidget(text_string_label);
     vLayout->addWidget(textLayout);
     vLayout->addWidget(typeface_label);
@@ -149,15 +201,23 @@ void MainWindow::initialize() {
     vLayout->addWidget(streetDensityXLayout);
     vLayout->addWidget(streetDensityZ_label);
     vLayout->addWidget(streetDensityZLayout);
+    vLayout->addWidget(fogDensity_label);
+    vLayout->addWidget(fogDensityLayout);
+    vLayout->addWidget(fogHeight_label);
+    vLayout->addWidget(fogHeightLayout);
+    vLayout->addWidget(solidFog_label);
+    vLayout->addWidget(solidFogLayout);
 
     connectUIElements();
 
     onValChangeTextBox("Hello World");
-    onValChangeTypefaceBox("Q");
+    onValChangeTypefaceBox("Rubik Mono One");
     onValChangeBuildingHeightBox(5.f);
     onValChangeBuildingIrregularityBox(2.f);
     onValChangeStreetDensityXBox(20.f);
     onValChangeStreetDensityZBox(20.f);
+    onValChangeFogDensityBox(0.75f);
+    onValChangeFogHeightBox(1.f);
 }
 
 void MainWindow::finish() {
@@ -166,12 +226,15 @@ void MainWindow::finish() {
 }
 
 void MainWindow::connectUIElements() {
-    connectSaveImage();
+    // connectSaveImage();
     connectText();
     connectBuildingHeight();
     connectBuildingIrregularity();
     connectStreetDensityX();
     connectStreetDensityZ();
+    connectFogDensity();
+    connectFogHeight();
+    connectSolidFog();
 }
 
 void MainWindow::connectSaveImage() {
@@ -205,6 +268,22 @@ void MainWindow::connectStreetDensityZ() {
     connect(streetDensityZSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeStreetDensityZSlider);
     connect(streetDensityZBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeStreetDensityZBox);
+}
+
+void MainWindow::connectFogDensity() {
+    connect(fogDensitySlider, &QSlider::valueChanged, this, &MainWindow::onValChangeFogDensitySlider);
+    connect(fogDensityBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeFogDensityBox);
+}
+
+void MainWindow::connectFogHeight() {
+    connect(fogHeightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeFogHeightSlider);
+    connect(fogHeightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeFogHeightBox);
+}
+
+void MainWindow::connectSolidFog() {
+    connect(solidFogBox, &QCheckBox::clicked,this, &MainWindow::onValChangeSolidFogBox);
 }
 
 void MainWindow::onSaveImage() {
@@ -293,5 +372,38 @@ void MainWindow::onValChangeStreetDensityZBox(double newValue) {
     streetDensityZSlider->setValue(int(newValue*100.f));
     //farBox->setValue(newValue);
     settings.streetDensityZ = streetDensityZBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeFogDensitySlider(int newValue) {
+    //farSlider->setValue(newValue);
+    fogDensityBox->setValue(newValue/100.f);
+    settings.fogDensity = fogDensityBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeFogDensityBox(double newValue) {
+    fogDensitySlider->setValue(int(newValue * 100.f));
+    //farBox->setValue(newValue);
+    settings.fogDensity = fogDensityBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeFogHeightSlider(int newValue) {
+    //farSlider->setValue(newValue);
+    fogHeightBox->setValue(newValue/100.f);
+    settings.fogHeight = fogHeightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeFogHeightBox(double newValue) {
+    fogHeightSlider->setValue(int(newValue * 100.f));
+    //farBox->setValue(newValue);
+    settings.fogHeight = fogHeightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeSolidFogBox() {
+    settings.solidFog = !settings.solidFog;
     realtime->settingsChanged();
 }

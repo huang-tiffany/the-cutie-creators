@@ -50,7 +50,7 @@ add_executable(${PROJECT_NAME}
     src/camera.h
     src/realtimescene.h
     src/text_fonts_glyphs.h
-
+    src/shapes/fog.h src/shapes/fog.cpp
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`

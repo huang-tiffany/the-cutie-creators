@@ -36,7 +36,9 @@ void Realtime::finish() {
 
     // Students: anything requiring OpenGL calls when the program exits should be done here
     glDeleteBuffers(1, &m_vbo_cube);
+    glDeleteBuffers(1, &m_vbo_fog);
     glDeleteBuffers(1, &m_vao_cube);
+    glDeleteBuffers(1, &m_vao_fog);
     glDeleteProgram(m_shader);
     this->doneCurrent();
 
@@ -108,6 +110,7 @@ void Realtime::initializeGL() {
     cube->updateParams(1);
 
     setUpShapeData(m_vbo_cube, m_vao_cube, cube->generateShape());
+    setUpShapeData(m_vbo_fog, m_vao_fog, fog.generateFog());
 
     m_text_model = rotate(m_text_model, M_PI / -2.f, glm::vec3(1.0f, 0.f, 0.0f));
 
@@ -171,12 +174,18 @@ void Realtime::initializeGL() {
     setUpScene();
 }
 
+
+
+
 void Realtime::paintGL() {
     glClearColor(0,0,0,1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_text->draw_messages(m_text->messages.size() - 1);
 
+    glm::mat4 fogMatrix(0.f);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     for (RenderShapeData shape : m_data.shapes) {
         glBindVertexArray(m_vao_cube);
 
@@ -199,6 +208,7 @@ void Realtime::paintGL() {
         m_mvp = m_proj * m_view * m_text_model * shape.ctm;
 
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp_matrix"), 1, GL_FALSE, &m_mvp[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "fog_matrix"), 1, GL_FALSE, &fogMatrix[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "transp_inv_model_matrix"), 1, GL_FALSE, &shape.transpInvCtm[0][0]);
 
         glUniform1f(glGetUniformLocation(m_shader, "ka"), m_data.globalData.ka);
@@ -219,11 +229,31 @@ void Realtime::paintGL() {
         glUniform1i(glGetUniformLocation(m_shader, "numLights"), m_numLights);
         glUniform1f(glGetUniformLocation(m_shader, "shininess"), 20);
         glUniform4fv(glGetUniformLocation(m_shader, "cameraPos"), 1, &m_data.cameraData.pos[0]);
+        glUniform1i(glGetUniformLocation(m_shader, "isFog"), 0);
 
         glDrawArrays(GL_TRIANGLES, 0, cube->generateShape().size() / 6);
 
         glBindVertexArray(0);
     }
+
+    glBindVertexArray(m_vao_fog);
+    glUseProgram(m_shader);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture"), 31);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_width"), m_latest_message.alphabet_texture_width);
+    glUniform1i(glGetUniformLocation(m_shader, "alphabet_texture_height"), m_latest_message.alphabet_texture_height);
+    glm::mat4 identityMatrix(1.0f);
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "model"), 1, GL_FALSE, &identityMatrix[0][0]);
+    fogMatrix = m_proj * m_view * m_text_model * identityMatrix;
+    glUniformMatrix4fv(glGetUniformLocation(m_shader, "fog_matrix"), 1, GL_FALSE, &fogMatrix[0][0]);
+    glUniform1i(glGetUniformLocation(m_shader, "isFog"), 1);
+    glUniform1f(glGetUniformLocation(m_shader, "fogDensity"), settings.fogDensity);
+    int res = fog.getResolution();
+    if (!settings.solidFog) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+        glPointSize(4);
+    }
+    glDrawArrays(GL_TRIANGLES, 0, res * res * 6);
+    glBindVertexArray(0);
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -299,7 +329,9 @@ void Realtime::setUpScene() {
     lightData.dir = dir;
     m_data.lights.push_back(lightData);
 
-    generateCity();
+    settingsChangedFog();
+    settingsChangedCity();
+    settingsChangedText();
 
     RealtimeScene scene{ size().width(), size().height(), m_data };
     m_camera = scene.getCamera();
@@ -403,19 +435,51 @@ void Realtime::generateCity() {
     }
 }
 
+void Realtime::generateFog() {
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo_fog);
+    std::vector<float> newFog = fog.generateFog();
+    glBufferData(GL_ARRAY_BUFFER, newFog.size() * sizeof(GLfloat), newFog.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+}
+
+void Realtime::settingsChangedFog() {
+    generateFog();
+    m_prev_fog_height = settings.fogHeight;
+    m_prev_solid_fog = settings.solidFog;
+}
+
+void Realtime::settingsChangedCity() {
+    makeFBO();
+    generateCity();
+
+    m_prev_building_height = settings.buildingHeight;
+    m_prev_building_irregularity = settings.buildingIrregularity;
+    m_prev_street_density_x = settings.streetDensityX;
+    m_prev_street_density_z = settings.streetDensityZ;
+}
+
+void Realtime::settingsChangedText() {
+    free(m_text);
+    m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
+    std::string typefaceFilepath = settings.typeface;
+    typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
+    m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
+    m_latest_message = m_text->messages[m_text->messages.size() - 1];
+    m_prev_text_message = settings.text;
+    m_prev_typeface = settings.typeface;
+    generateCity();
+}
+
 void Realtime::settingsChanged() {
     if (initFinish) {
-        free(m_text);
-        m_text = new Text(m_free_type, m_fbo_width, m_fbo_height, settings.text); // Declare a new text object, passing in your chosen alphabet.
-        std::string typefaceFilepath = settings.typeface;
-        typefaceFilepath.erase(remove_if(typefaceFilepath.begin(), typefaceFilepath.end(), isspace), typefaceFilepath.end());
-        m_text->create_text_message(settings.text, 0, 0, "resources/typefaces/" + typefaceFilepath + ".ttf", m_text_size, false);
-        m_latest_message = m_text->messages[m_text->messages.size() - 1];
-
-        glm::vec2 dims = m_text->calculate_message_image_size(m_latest_message);
-        glViewport(0, 0, dims[0], dims[1]);
-        makeFBO();
-        generateCity();
+        if (settings.fogHeight != m_prev_fog_height || settings.solidFog != m_prev_solid_fog) {
+            settingsChangedFog();
+        } else if (settings.buildingHeight != m_prev_building_height || settings.buildingIrregularity != m_prev_building_irregularity ||
+                   settings.streetDensityX != m_prev_street_density_x || settings.streetDensityZ != m_prev_street_density_z) {
+            settingsChangedCity();
+        } else if (settings.text.compare(m_prev_text_message) != 0 || settings.typeface.compare(m_prev_typeface) != 0) {
+            settingsChangedText();
+        }
     }
     update(); // asks for a PaintGL() call to occur
 }
@@ -596,4 +660,3 @@ void Realtime::saveViewportImage(std::string filePath) {
     glDeleteRenderbuffers(1, &rbo);
     glDeleteFramebuffers(1, &fbo);
 }
-
