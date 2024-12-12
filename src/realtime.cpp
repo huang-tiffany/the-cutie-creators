@@ -245,6 +245,7 @@ void Realtime::paintGL() {
     fogMatrix = m_proj * m_view * m_text_model * identityMatrix;
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "fog_matrix"), 1, GL_FALSE, &fogMatrix[0][0]);
     glUniform1i(glGetUniformLocation(m_shader, "isFog"), 1);
+    glUniform1f(glGetUniformLocation(m_shader, "fogDensity"), settings.fogDensity);
     int res = fog.getResolution();
     glPolygonMode(GL_FRONT_AND_BACK, fog.m_wireshade? GL_LINE : GL_FILL);
     glDrawArrays(GL_TRIANGLES, 0, res * res * 6);

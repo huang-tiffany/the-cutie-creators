@@ -40,6 +40,8 @@ void MainWindow::initialize() {
     streetDensityX_label->setText("Horizontal Street Density:");
     QLabel *streetDensityZ_label = new QLabel(); // Far plane label
     streetDensityZ_label->setText("Vertical Street Density:");
+    QLabel *fogDensity_label = new QLabel(); // Far plane label
+    fogDensity_label->setText("Fog Density:");
     
     saveImage = new QPushButton();
     saveImage->setText(QStringLiteral("Save image"));
@@ -57,6 +59,9 @@ void MainWindow::initialize() {
     QHBoxLayout *lstreetDensityX = new QHBoxLayout();
     QGroupBox *streetDensityZLayout = new QGroupBox(); // horizonal far slider alignment
     QHBoxLayout *lstreetDensityZ = new QHBoxLayout();
+    QGroupBox *fogDensityLayout = new QGroupBox(); // horizonal far slider alignment
+    QHBoxLayout *lfogDensity = new QHBoxLayout();
+
 
     textBox = new QLineEdit();
     textBox->setText("Hello World");
@@ -112,6 +117,23 @@ void MainWindow::initialize() {
     streetDensityZBox->setSingleStep(1.f);
     streetDensityZBox->setValue(20.f);
 
+    fogDensitySlider = new QSlider(Qt::Orientation::Horizontal); // Near plane slider
+    fogDensitySlider->setTickInterval(1);
+    fogDensitySlider->setMinimum(0);
+    fogDensitySlider->setMaximum(100);
+    fogDensitySlider->setValue(75);
+
+    fogDensityBox = new QDoubleSpinBox();
+    fogDensityBox->setMinimum(0.f);
+    fogDensityBox->setMaximum(1.f);
+    fogDensityBox->setSingleStep(0.01f);
+    fogDensityBox->setValue(0.75f);
+
+    ltext->addWidget(textBox);
+    ltypeface->addWidget(typefaceBox);
+    textLayout->setLayout(ltext);
+    typefaceLayout->setLayout(ltypeface);
+
     ltext->addWidget(textBox);
     ltypeface->addWidget(typefaceBox);
     textLayout->setLayout(ltext);
@@ -133,6 +155,10 @@ void MainWindow::initialize() {
     lstreetDensityZ->addWidget(streetDensityZBox);
     streetDensityZLayout->setLayout(lstreetDensityZ);
 
+    lfogDensity->addWidget(fogDensitySlider);
+    lfogDensity->addWidget(fogDensityBox);
+    fogDensityLayout->setLayout(lfogDensity);
+
     vLayout->addWidget(saveImage);
 
     vLayout->addWidget(text_label);
@@ -149,6 +175,8 @@ void MainWindow::initialize() {
     vLayout->addWidget(streetDensityXLayout);
     vLayout->addWidget(streetDensityZ_label);
     vLayout->addWidget(streetDensityZLayout);
+    vLayout->addWidget(fogDensity_label);
+    vLayout->addWidget(fogDensityLayout);
 
     connectUIElements();
 
@@ -158,6 +186,7 @@ void MainWindow::initialize() {
     onValChangeBuildingIrregularityBox(2.f);
     onValChangeStreetDensityXBox(20.f);
     onValChangeStreetDensityZBox(20.f);
+    onValChangeFogDensityBox(0.75f);
 }
 
 void MainWindow::finish() {
@@ -172,6 +201,7 @@ void MainWindow::connectUIElements() {
     connectBuildingIrregularity();
     connectStreetDensityX();
     connectStreetDensityZ();
+    connectFogDensity();
 }
 
 void MainWindow::connectSaveImage() {
@@ -205,6 +235,12 @@ void MainWindow::connectStreetDensityZ() {
     connect(streetDensityZSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeStreetDensityZSlider);
     connect(streetDensityZBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeStreetDensityZBox);
+}
+
+void MainWindow::connectFogDensity() {
+    connect(fogDensitySlider, &QSlider::valueChanged, this, &MainWindow::onValChangeFogDensitySlider);
+    connect(fogDensityBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeFogDensityBox);
 }
 
 void MainWindow::onSaveImage() {
@@ -293,5 +329,19 @@ void MainWindow::onValChangeStreetDensityZBox(double newValue) {
     streetDensityZSlider->setValue(int(newValue*100.f));
     //farBox->setValue(newValue);
     settings.streetDensityZ = streetDensityZBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeFogDensitySlider(int newValue) {
+    //farSlider->setValue(newValue);
+    fogDensityBox->setValue(newValue/100.f);
+    settings.fogDensity = fogDensityBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeFogDensityBox(double newValue) {
+    fogDensitySlider->setValue(int(newValue * 100.f));
+    //farBox->setValue(newValue);
+    settings.fogDensity = fogDensityBox->value();
     realtime->settingsChanged();
 }

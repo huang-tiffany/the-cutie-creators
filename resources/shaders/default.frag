@@ -29,6 +29,7 @@ uniform vec3 font_colour;
 uniform sampler2D alphabet_texture;
 // uniform bool isText;
 uniform bool isFog;
+uniform float fogDensity;
 
 void main() {
     float texture_value = texture(alphabet_texture, texture_coordinates).r;
@@ -83,7 +84,7 @@ void main() {
             float heightFactor = 0.0;
             heightFactor = clamp(smoothstep(fogBottom, fogTop, worldPosition.y), 0.0, 1.0);
             fragColor = mix(darkFogColor, fogColor, heightFactor);
-            fragColor.a = mix(0.7, 1.0, heightFactor);
+            fragColor.a = mix(0.0, 1.0, heightFactor * fogDensity);
         }
     } else {
         // fragColor = vec4(0, 0, 0, 1);

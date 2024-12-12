@@ -18,6 +18,8 @@ struct Settings {
     int buildingIrregularity = 1;
     int streetDensityX = 1;
     int streetDensityZ = 1;
+
+    float fogDensity = 0.75;
 };
 
 
