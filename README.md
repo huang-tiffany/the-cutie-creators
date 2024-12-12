@@ -8,5 +8,5 @@ Tiffany Huang: city generation, type masking, fog display, UI
 Elijah Whang: fog generation, fog display, UI
 
 ## Citations
-Libraries used: OpenGL, GLEW, GLM, GLUT, FreeType
+Libraries used: OpenGL, GLEW, GLM, GLUT, FreeType  
 Source code for type integrations from Code Imposter used with slight adaptation (https://www.youtube.com/watch?v=iX-Sx6Ohrf8, https://www.programmingcreatively.com/opengl-tutorial-12-qs.php)
